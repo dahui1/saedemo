@@ -1,77 +1,67 @@
-#include <iostream>
-#include <unordered_map>
-#include "io/mgraph.hpp"
-#include "serialization/serialization_includes.hpp"
-#include "aminer.hpp"
-#include "indexing/search.hpp"
+#include "aminerdata.hpp"
 
 using namespace std;
 using namespace sae::io;
+using namespace indexing;
 
-template <typename T>
-inline T parse(const string& data) {
-    return sae::serialization::convert_from_string<T>(data);
-}
+#define BM25_K 2.0
+#define BM25_B 0.75
 
-template <typename T>
-inline std::unique_ptr<T> pparse(const string& data) {
-    T *ret;
-    std::stringstream stream;
-    stream.str(data);
-    sae::serialization::ISerializeStream decoder(&stream);
-    decoder >> (*ret);
-    return std::unique_ptr<T>(ret);
-}
-
-struct AMinerData {
-    AMinerData(char const * prefix) {
-        cerr << "loading aminer graph..." << endl;
-        g.reset(MappedGraph::Open(prefix));
-
-        cerr << "building index..." << endl;
-        for (auto ai = g->Vertices(); ai->Alive(); ai->Next()) {
-            if (ai->GlobalId() % 100000 == 0)
-                cerr << "Parsing vertex: " << ai->GlobalId() << ", type: " << ai->Typename() << endl;
-            if (ai->Typename() == "Author") {
-                auto a = parse<Author>(ai->Data());
-                author_index.addSingle(ai->GlobalId(), "name", a.names[0]);
-            } else if (ai->Typename() == "Publication") {
-                auto p = parse<Publication>(ai->Data());
-                pub_index.addSingle(ai->GlobalId(), "title", p.title);
-            } else if (ai->Typename() == "JConf") {
-                auto j = parse<JConf>(ai->Data());
-                jconf_index.addSingle(ai->GlobalId(), "name", j.name);
-            }
+AMinerData::AMinerData(char const * prefix) {
+    cerr << "loading aminer graph..." << endl;
+    g.reset(MappedGraph::Open(prefix));
+    cerr << "building index..." << endl;
+    double avgLen = 0, count = 0;
+    for (auto ai = g->Vertices(); ai->Alive(); ai->Next()) {
+        if (ai->Typename() == "Publication") {
+            count++;
+            auto p = parse<Publication>(ai->Data());
+            for (unsigned i = 0; i < p.title.length(); i++)
+                if (p.title[i] == ' ' && i != p.title.length()-1)
+                    avgLen++;
+            avgLen++;
+            for (unsigned i = 0; i < p.abstract.length(); i++)
+                if (p.abstract[i] == ' ' && i != p.abstract.length()-1)
+                    avgLen++;
+            avgLen++;
         }
-        cerr << "index built!" << endl;
-
     }
+    cout << "count: " << cout << endl;
+    avgLen /= count;
+    cout << "avgLen: " << avgLen << endl;
+    for (auto ai = g->Vertices(); ai->Alive(); ai->Next()) {
+        if (ai->GlobalId() % 100000 == 0)
+            cerr << "Parsing vertex: " << ai->GlobalId() << ", type: " << ai->Typename() << endl;
+        if (ai->Typename() == "Author") {
+            auto a = parse<Author>(ai->Data());
+            std::pair<std::string, int> author(a.names[0], ai->GlobalId());
+            author_index.map.insert(author);
+        } else if (ai->Typename() == "Publication"){
+            auto p = parse<Publication>(ai->Data());
+            unique_ptr<TokenStream> stream(ArnetAnalyzer::tokenStream(p.title + " " + p.abstract));
+            unordered_map<int, vector<short>> word_position;
+            int position = 0;
 
-    ~AMinerData() {
+            Token token;
+            while (stream->next(token)) {
+                string term = token.getTermText();
+                int term_id = pub_index.word_map.id(term);
+                word_position[term_id].push_back(position++);
+            }
+               int totalTokens = position;
+            for (auto& wp : word_position) {
+                int word_id = wp.first;
+                auto& positions = wp.second;
+                int freq = static_cast<int>(positions.size());
+                double score = (freq * (BM25_K + 1)) / (freq + BM25_K * (1 - BM25_B + BM25_B * totalTokens / avgLen));
+                // insert a new posting item, global id cannot be larger than max int
+                pub_index[Term{word_id, 0}].insert(PostingItem{static_cast<int>(ai->GlobalId()), positions, score});
+            }
+        } else if (ai->Typename() == "JConf") {
+            auto j = parse<JConf>(ai->Data());
+            std:pair<std::string, int> jconf (j.name, ai->GlobalId());
+            jconf_index.map.insert(jconf);
+        }
     }
-
-    indexing::SearchResult searchPublications(const string& query) {
-        return indexing::Searcher(pub_index).search(query);
-    }
-
-    template<typename T>
-    T get(vid_t id) {
-        auto vi = g->Vertices();
-        vi->MoveTo(id);
-        return parse<T>(vi->Data());
-    }
-
-    indexing::Index author_index, pub_index, jconf_index;
-    std::unique_ptr<MappedGraph> g;
-};
-
-
-int main() {
-    AMinerData aminer("aminer");
-    auto result = aminer.searchPublications("data mining");
-    for (auto& i : result) {
-        cout << "search result: " << i.docId << ", score: " << i.score << endl;
-        auto p = aminer.get<Publication>(i.docId);
-        cout << "title: " << p.title << endl;
-    }
+    cerr << "index built!" << endl;
 }

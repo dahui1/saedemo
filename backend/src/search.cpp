@@ -1,73 +1,124 @@
-#include "search.hpp"
+#include <chrono>
+#include <algorithm>
+
 #include "indexing/search.hpp"
+#include "search.hpp"
 #include "interface.pb.h"
+#include "aminerdata.hpp"
+#include "expert_searcher.hpp"
 
 using namespace std;
 using namespace demoserver;
 using namespace indexing;
-
-namespace {
-    DocumentCollection testData() {
-        DocumentCollection dc;
-        Document doc1, doc2, doc3;
-        doc1.id = 1;
-        doc2.id = 2;
-        doc3.id = 3;
-        doc1.push_back({"title", "initial document"});
-        doc1.push_back({"content", "To maximize the scale of the community around a project, by reducing the friction for new Contributors and creating a scaled participation model with strong positive feedbacks;"});
-        doc2.push_back({"title", "second document"});
-        doc2.push_back({"content", "To relieve dependencies on key individuals by separating different skill sets so that there is a larger pool of competence in any required domain;"});
-        doc3.push_back({"title", "third document"});
-        doc3.push_back({"content", "To allow the project to develop faster and more accurately, by increasing the diversity of the decision making process;"});
-        dc[1] = doc1;
-        dc[2] = doc2;
-        dc[3] = doc3;
-        return dc;
-    }
-
-    DocumentCollection& getDataset(const string& name) {
-        // XXX only test data now
-        static DocumentCollection dc = testData();
-        return dc;
-    }
-
-    Index& getIndex(const DocumentCollection& dc) {
-        // XXX only test data now
-        static Index index = Index::build(dc);
-        return index;
-    }
-
-    SearchResult search(const DocumentCollection &dataset, const string &query) {
-        Searcher searcher(getIndex(dataset));
-        return searcher.search(query);
-    }
-}
+using namespace std::chrono;
+using namespace sae::io;
 
 namespace demoserver {
 
-bool EntitySearch(const string& input, string& output) {
-    EntitySearchRequest request;
-    request.ParseFromString(input);
-
-    string dataset = request.dataset();
-    DocumentCollection& dc = getDataset(dataset);
-    string query = request.query();
-    cout << "searching on " << dataset << " for query " << query << endl;
-    auto result = search(dc, query);
-
-    EntitySearchResponse response;
-    response.set_total_count(result.total_count);
-    response.set_query(query);
-
-    for (int i = 0; i < result.size(); i ++)
-    {
-        DetailedEntity *de = response.add_entity();
-        int id = result[i].docId;
-        de->set_title(dc[id][0].value);
-        de->set_id(id);
+    bool sortByScore(const QueryItem& A, const QueryItem& B) {
+        return A.score > B.score;
     }
 
-    return response.SerializeToString(&output);
-}
+    bool AuthorSearch(const string& input, string& output) {
+        EntitySearchRequest request;
+        request.ParseFromString(input);
+        string query = request.query();
 
+        int offset, count;
+        if (request.has_offset())
+            offset = request.offset();
+        else
+            offset = 0;
+        if (request.has_count())
+            count = request.count();
+        else
+            count = 500;
+        AMinerData& aminer = AMinerData::instance();
+        auto result = ExpertSearcher(aminer.getPubindex()).search(query, aminer.getGraph());
+        EntitySearchResponse response;
+        response.set_total_count(count);
+        response.set_query(query);
+        for (int ri = offset; ri < result.size() && ri - offset < count; ri++) {
+            auto i = result[ri];
+            DetailedEntity *de = response.add_entity();
+            auto p = aminer.get<Author>(i.docId);
+            de->set_title(p.names[0]);
+            de->set_id(i.docId);
+            de->set_description(p.position + p.affiliation);
+            de->set_imgurl(p.imgurl);
+        }
+        return response.SerializeToString(&output);
+    }
+
+    bool AuthorPublicationSearch(const string& input, string& output) {
+        EntitySearchRequest request;
+        request.ParseFromString(input);
+        string query = request.query();
+        AMinerData& aminer = AMinerData::instance();
+
+        auto result = ExpertSearcher(aminer.getPubindex()).search(query, aminer.getGraph());
+        auto vi = aminer.getGraph()->Vertices();
+        map<vid_t, bool> publications;
+        EntitySearchResponse response;
+        response.set_query(query);
+        int count = 0;
+        for (auto& i : result) {
+            vi->MoveTo(i.docId);
+            auto edgeIt = vi->OutEdges();
+            while (edgeIt->Alive()) {
+                if (edgeIt->Typename() == "Publish") {
+                    auto pit = publications.find(i.docId);
+                    if (pit != publications.end()) {
+                        edgeIt->Next();
+                        continue;
+                    }
+                    publications[i.docId] = true;
+                    DetailedEntity *de = response.add_entity();
+                    auto vt = edgeIt->Target();
+                    auto p = sae::serialization::convert_from_string<Publication>(vt->Data());
+                    de->set_title(p.title);
+                    de->set_id(i.docId);
+                    de->set_description(p.abstract);
+                }
+                edgeIt->Next();
+            }
+        }
+        response.set_total_count(publications.size());
+        return response.SerializeToString(&output);
+    }
+
+    bool PubSearch(const string& input, string& output) {
+        EntitySearchRequest request;
+        request.ParseFromString(input);
+        string query = request.query();
+                int offset, count;
+                if (request.has_offset())
+                        offset = request.offset();
+                else
+                        offset = 0;
+                if (request.has_count())
+                        count = request.count();
+                else
+                        count = 500;
+
+        AMinerData& aminer = AMinerData::instance();
+        auto result = Searcher(aminer.getPubindex()).search(query);
+
+        if (result.size() > 5000)
+            result.resize(5000);
+
+        std::sort(result.begin(), result.end(), sortByScore);
+        EntitySearchResponse response;
+        response.set_total_count(result.size());
+        response.set_query(query);
+        for (int ri = offset; ri < result.size() && ri - offset < count; ri++) {
+            auto i = result[ri];
+            DetailedEntity *de = response.add_entity();
+            auto p = aminer.get<Publication>(i.docId);
+            de->set_title(p.title);
+            de->set_id(i.docId);
+            de->set_description(p.abstract);
+        }
+        return response.SerializeToString(&output);
+    }
 }

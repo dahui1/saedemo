@@ -39,7 +39,7 @@ class SAEClient(object):
         r = interface_pb2.EntitySearchRequest()
         r.dataset = dataset
         r.query = query
-        response = pbrequest(self.endpoint, "EntitySearch", r)
+        response = pbrequest(self.endpoint, "AuthorPubSearch", r)
         er = interface_pb2.EntitySearchResponse()
         er.ParseFromString(response)
         return er
@@ -47,7 +47,7 @@ class SAEClient(object):
 
 def main():
     c = SAEClient("tcp://localhost:40111")
-    print c.entity_search("academic", "project develop")
+    print c.entity_search("academic", "data mining")
 
 
 if __name__ == "__main__":

@@ -16,5 +16,5 @@ endif()
 # find saedb library
 set(SAEDB_ROOT_PATH "../../saedb" CACHE FILEPATH "root of saedb library")
 
-add_subdirectory (src)
 add_subdirectory (${SAEDB_ROOT_PATH} ${CMAKE_CURRENT_BINARY_DIR}/saedb)
+add_subdirectory (src)

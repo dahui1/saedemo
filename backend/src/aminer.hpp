@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #include <vector>
 #include "serialization/serialization_includes.hpp"

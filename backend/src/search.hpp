@@ -2,6 +2,8 @@
 
 namespace demoserver {
 
-bool EntitySearch(const std::string&, std::string&);
+bool PubSearch(const std::string&, std::string&);
+bool AuthorSearch(const std::string&, std::string&);
+bool AuthorPublicationSearch(const std::string&, std::string&);
 
 }
