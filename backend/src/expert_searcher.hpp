@@ -1,9 +1,8 @@
 #pragma once
-#include "indexing/search.hpp"
-#include "indexing/query.hpp"
-#include "features.hpp"
-#include "aminer.hpp"
 #include "io/mgraph.hpp"
+#include "indexing/search.hpp"
+#include "features.hpp"
+#include "aminerdata.hpp"
 
 /*
 * We only provide document based expert search( search expert by search corresponding publications first)
@@ -15,11 +14,11 @@
 class ExpertSearcher
 {
 public:
-	ExpertSearcher(indexing::Index& index, int max_pub_count = 5000);
+	ExpertSearcher(const AMinerData& aminer, int max_pub_count = 5000);
 	~ExpertSearcher();
-	indexing::SearchResult search(std::string query, sae::io::MappedGraph* g);
+	indexing::SearchResult search(std::string query);
 private:
-	indexing::Index& index;
+	const AMinerData& aminer;
 	int pub_count;
 };
 

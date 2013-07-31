@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <unordered_map>
 #include <string>
@@ -5,7 +6,6 @@
 #include "serialization/serialization_includes.hpp"
 #include "aminer.hpp"
 #include "indexing/search.hpp"
-#include "expert_searcher.hpp"
 #include "indexing/analyzer.hpp"
 
 template <typename T>
@@ -19,19 +19,7 @@ struct AMinerData {
     ~AMinerData() {
     }
 
-    indexing::Index& getAuthorIndex() {
-        return author_index;
-    }
-
-    indexing::Index& getPubIndex() {
-        return pub_index;
-    }
-
-    indexing::Index& getJConfIndex() {
-        return jconf_index;
-    }
-
-    sae::io::MappedGraph* getGraph() {
+    sae::io::MappedGraph* getGraph() const {
         return g.get();
     }
 
@@ -42,13 +30,15 @@ struct AMinerData {
     }
 
     template<typename T>
-    T get(sae::io::vid_t id) {
+    T get(sae::io::vid_t id) const {
         auto vi = g->Vertices();
         vi->MoveTo(id);
         return parse<T>(vi->Data());
     }
 
-    indexing::Index author_index, pub_index, jconf_index;
+    indexing::SearchResult search_publications(const string& query) const;
+
+    std::vector<indexing::Index> pub_index_shards;
     std::unique_ptr<sae::io::MappedGraph> g;
 };
 

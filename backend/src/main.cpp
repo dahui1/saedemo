@@ -12,7 +12,7 @@ void setup_services(RpcServer* server) {
 
 int main() {
     AMinerData& aminer = AMinerData::instance();
-    RpcServer* server = RpcServer::CreateServer(40111, 20);
+    RpcServer* server = RpcServer::CreateServer(40112, 20);
     setup_services(server);
     server->run();
     return 0;
