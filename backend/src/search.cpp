@@ -34,7 +34,7 @@ namespace demoserver {
         else
             count = 500;
         AMinerData& aminer = AMinerData::instance();
-        auto result = ExpertSearcher(aminer.getPubindex()).search(query, aminer.getGraph());
+        auto result = ExpertSearcher(aminer.getPubIndex()).search(query, aminer.getGraph());
         EntitySearchResponse response;
         response.set_total_count(count);
         response.set_query(query);
@@ -56,7 +56,7 @@ namespace demoserver {
         string query = request.query();
         AMinerData& aminer = AMinerData::instance();
 
-        auto result = ExpertSearcher(aminer.getPubindex()).search(query, aminer.getGraph());
+        auto result = ExpertSearcher(aminer.getPubIndex()).search(query, aminer.getGraph());
         auto vi = aminer.getGraph()->Vertices();
         map<vid_t, bool> publications;
         EntitySearchResponse response;
@@ -102,7 +102,7 @@ namespace demoserver {
                         count = 500;
 
         AMinerData& aminer = AMinerData::instance();
-        auto result = Searcher(aminer.getPubindex()).search(query);
+        auto result = Searcher(aminer.getPubIndex()).search(query);
 
         if (result.size() > 5000)
             result.resize(5000);

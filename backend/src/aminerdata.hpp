@@ -13,16 +13,6 @@ inline T parse(const string& data) {
     return sae::serialization::convert_from_string<T>(data);
 }
 
-template <typename T>
-inline std::unique_ptr<T> pparse(const string& data) {
-    T *ret;
-    std::stringstream stream;
-    stream.str(data);
-    sae::serialization::ISerializeStream decoder(&stream);
-    decoder >> (*ret);
-    return std::unique_ptr<T>(ret);
-}
-
 struct AMinerData {
     AMinerData(char const * prefix);
 
@@ -33,7 +23,7 @@ struct AMinerData {
         return author_index;
     }
 
-    indexing::Index& getPubindex() {
+    indexing::Index& getPubIndex() {
         return pub_index;
     }
 

@@ -31,25 +31,8 @@ AMinerData::AMinerData(char const * prefix) {
             cerr << "Parsing vertex: " << ai->GlobalId() << ", type: " << ai->Typename() << endl;
         if (ai->Typename() == "Publication"){
             auto p = parse<Publication>(ai->Data());
-            unique_ptr<TokenStream> stream(ArnetAnalyzer::tokenStream(p.title + " " + p.abstract));
-            unordered_map<int, vector<short>> word_position;
-            int position = 0;
-
-            Token token;
-            while (stream->next(token)) {
-                string term = token.getTermText();
-                int term_id = pub_index.word_map.id(term);
-                word_position[term_id].push_back(position++);
-            }
-               int totalTokens = position;
-            for (auto& wp : word_position) {
-                int word_id = wp.first;
-                auto& positions = wp.second;
-                int freq = static_cast<int>(positions.size());
-                double score = (freq * (BM25_K + 1)) / (freq + BM25_K * (1 - BM25_B + BM25_B * totalTokens / avgLen));
-                // insert a new posting item, global id cannot be larger than max int
-                pub_index[Term{word_id, 0}].insert(PostingItem{static_cast<int>(ai->GlobalId()), positions, score});
-            }
+            string text = p.title + " " + p.abstract;
+            pub_index.addSingle(ai->GlobalId(), 0, text, avgLen);
         }
     }
     cerr << "index built!" << endl;
