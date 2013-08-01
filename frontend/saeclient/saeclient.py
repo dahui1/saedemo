@@ -35,6 +35,24 @@ class SAEClient(object):
     def echo_test(self, s):
         return request(self.endpoint, "echo_test", s)
 
+    def author_search(self, dataset, query):
+        r = interface_pb2.EntitySearchRequest()
+        r.dataset = dataset
+        r.query = query
+        response = pbrequest(self.endpoint, "AuthorSearch", r)
+        er = interface_pb2.EntitySearchResponse()
+        er.ParseFromString(response)
+        return er
+
+    def pub_search(self, dataset, query):
+        r = interface_pb2.EntitySearchRequest()
+        r.dataset = dataset
+        r.query = query
+        response = pbrequest(self.endpoint, "PubSearch", r)
+        er = interface_pb2.EntitySearchResponse()
+        er.ParseFromString(response)
+        return er
+
     def entity_search(self, dataset, query):
         r = interface_pb2.EntitySearchRequest()
         r.dataset = dataset
@@ -47,7 +65,7 @@ class SAEClient(object):
 
 def main():
     c = SAEClient("tcp://localhost:40111")
-    print c.entity_search("academic", "data mining")
+    print c.author_search("academic", "data mining")
 
 
 if __name__ == "__main__":

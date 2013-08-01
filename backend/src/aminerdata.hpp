@@ -23,12 +23,6 @@ struct AMinerData {
         return g.get();
     }
 
-    static AMinerData& instance()
-    {
-        static AMinerData instance("aminer");
-        return instance;
-    }
-
     template<typename T>
     T get(sae::io::vid_t id) const {
         auto vi = g->Vertices();

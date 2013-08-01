@@ -17,4 +17,8 @@ endif()
 set(SAEDB_ROOT_PATH "../../saedb" CACHE FILEPATH "root of saedb library")
 
 add_subdirectory (${SAEDB_ROOT_PATH} ${CMAKE_CURRENT_BINARY_DIR}/saedb)
+# add includes for google-glog
+include_directories ("${google-glog_SOURCE_DIR}/src")
+# add includes for gflags
+include_directories ("${gflags_BINARY_DIR}/include")
 add_subdirectory (src)
