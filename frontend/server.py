@@ -3,11 +3,17 @@
 import os.path
 from bottle import route, run, template, view, static_file, request, urlencode
 from saeclient import SAEClient
+import logging
 
 import sample_data
+from knowledge_drift import KnowledgeDrift
 
-client = SAEClient("tcp://127.0.0.1:40111")
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
+client = SAEClient("tcp://10.1.1.111:40111")
+logging.info("instancing knowledge drift visualization")
+knowledge_drift_client = KnowledgeDrift()
+logging.info("done") 
 
 @route('/')
 def index():
@@ -81,7 +87,7 @@ def search():
 
 
 @route('/<data>/topictrends')
-@view('topictrends')
+@view('knowledge_drift')
 def search(data):
     q = request.query.q or ''
     print 'rendering trends for', q, 'on', data
@@ -89,6 +95,20 @@ def search(data):
         query=q
     )
 
+@route('/<data>/terms')
+def search(data):
+    q = request.query.q or ''
+    start = int(request.query.start) or 0
+    end = int(request.query.end) or 10000
+    print 'rendering terms for', q, 'on', data, 'between', start, "and", end
+    return topic_trend_client.query_terms(q, start_time=start, end_time=end)
+
+@route('/<data>/render')
+def topic_trends(data):
+    q = request.query.q or ''
+    threshold = request.query.threshold or ''
+    print 'rendering trends for', q, threshold, 'on', data
+    return topic_trend_client.query_topic_trends(q, float(threshold))
 
 @route('/<data>/<uid:int>/influence/trends.tsv')
 def influence_trends(data, uid):
