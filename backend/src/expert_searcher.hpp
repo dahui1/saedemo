@@ -1,8 +1,6 @@
 #pragma once
-#include "io/mgraph.hpp"
-#include "indexing/search.hpp"
-#include "features.hpp"
 #include "aminerdata.hpp"
+#include "indexing/search.hpp"
 
 /*
 * We only provide document based expert search( search expert by search corresponding publications first)
@@ -21,5 +19,3 @@ private:
 	const AMinerData& aminer;
 	int pub_count;
 };
-
-double get_score(ExtractFeatureParam* param_ptr, sae::io::MappedGraph* g);

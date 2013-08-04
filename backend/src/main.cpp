@@ -1,4 +1,7 @@
+#include <memory>
+
 #include "gflags/gflags.h"
+#include "glog/logging.h"
 #include "rpc/RpcServer.hpp"
 #include "search.hpp"
 #include "aminerdata.hpp"
@@ -11,18 +14,33 @@ using namespace std;
 using namespace sae::rpc;
 
 void setup_services(RpcServer* server) {
-    AMinerData aminer(FLAGS_aminer.c_str());
-    SearchService service(aminer);
-    auto b = make_binder(service);
+    LOG(INFO) << "Loading aminer data...";
+    auto aminer = unique_ptr<AMinerData>(new AMinerData(FLAGS_aminer.c_str()));
+
+    LOG(INFO) << "Making aminer services...";
+    // Note that this object have to be allocated on heap
+    auto service = new SearchService(std::move(aminer));
+
+    LOG(INFO) << "Binding aminer services...";
+    auto b = make_binder(*service);
     server->addMethod("PubSearch", b(&SearchService::PubSearch));
     server->addMethod("AuthorSearch", b(&SearchService::AuthorSearch));
-    server->addMethod("AuthorPubSearch", b(&SearchService::AuthorPublicationSearch));
+
+    LOG(INFO) << "AMiner services have been set up.";
 }
 
 int main(int argc, char** argv) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
+
+    LOG(INFO) << "Demo Server Starting...";
     RpcServer* server = RpcServer::CreateServer(FLAGS_port, FLAGS_threads);
+
+    LOG(INFO) << "Setting up services...";
     setup_services(server);
+
+    LOG(INFO) << "Trying to bringing our services up...";
     server->run();
+
+    LOG(INFO) << "Exiting...";
     return 0;
 }

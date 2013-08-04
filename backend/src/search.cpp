@@ -13,8 +13,8 @@ using namespace indexing;
 using namespace std::chrono;
 using namespace sae::io;
 
-SearchService::SearchService(AMinerData& data)
-    : aminer(data) {
+SearchService::SearchService(std::unique_ptr<AMinerData>&& data)
+    : aminer(std::move(data)) {
 }
 
 bool SearchService::AuthorSearch(const string& input, string& output) {
@@ -31,55 +31,19 @@ bool SearchService::AuthorSearch(const string& input, string& output) {
         count = request.count();
     else
         count = 500;
-    auto result = ExpertSearcher(aminer).search(query);
+    auto result = ExpertSearcher(*aminer).search(query);
     EntitySearchResponse response;
     response.set_total_count(count);
     response.set_query(query);
     for (int ri = offset; ri < result.size() && ri - offset < count; ri++) {
         auto i = result[ri];
         DetailedEntity *de = response.add_entity();
-        auto p = aminer.get<Author>(i.docId);
+        auto p = aminer->get<Author>(i.docId);
         de->set_title(p.names[0]);
         de->set_id(i.docId);
         de->set_description(p.position + p.affiliation);
         de->set_imgurl(p.imgurl);
     }
-    return response.SerializeToString(&output);
-}
-
-bool SearchService::AuthorPublicationSearch(const string& input, string& output) {
-    EntitySearchRequest request;
-    request.ParseFromString(input);
-    string query = request.query();
-
-    auto result = ExpertSearcher(aminer).search(query);
-    auto vi = aminer.getGraph()->Vertices();
-    map<vid_t, bool> publications;
-    EntitySearchResponse response;
-    response.set_query(query);
-    int count = 0;
-    for (auto& i : result) {
-        vi->MoveTo(i.docId);
-        auto edgeIt = vi->OutEdges();
-        while (edgeIt->Alive()) {
-            if (edgeIt->Typename() == "Publish") {
-                auto pit = publications.find(i.docId);
-                if (pit != publications.end()) {
-                    edgeIt->Next();
-                    continue;
-                }
-                publications[i.docId] = true;
-                DetailedEntity *de = response.add_entity();
-                auto vt = edgeIt->Target();
-                auto p = sae::serialization::convert_from_string<Publication>(vt->Data());
-                de->set_title(p.title);
-                de->set_id(i.docId);
-                de->set_description(p.abstract);
-            }
-            edgeIt->Next();
-        }
-    }
-    response.set_total_count(publications.size());
     return response.SerializeToString(&output);
 }
 
@@ -98,7 +62,7 @@ bool SearchService::PubSearch(const string& input, string& output) {
     else
         count = 500;
 
-    auto result = aminer.search_publications(query);
+    auto result = aminer->search_publications(query);
 
     if (result.size() > 5000)
         result.resize(5000);
@@ -109,7 +73,7 @@ bool SearchService::PubSearch(const string& input, string& output) {
     for (int ri = offset; ri < result.size() && ri - offset < count; ri++) {
         auto i = result[ri];
         DetailedEntity *de = response.add_entity();
-        auto p = aminer.get<Publication>(i.docId);
+        auto p = aminer->get<Publication>(i.docId);
         de->set_title(p.title);
         de->set_id(i.docId);
         de->set_description(p.abstract);
