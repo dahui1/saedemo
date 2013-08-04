@@ -13,14 +13,6 @@ using namespace indexing;
 using namespace std::chrono;
 using namespace sae::io;
 
-namespace {
-
-bool sortByScore(const QueryItem& A, const QueryItem& B) {
-    return A.score > B.score;
-}
-
-}
-
 SearchService::SearchService(AMinerData& data)
     : aminer(data) {
 }
@@ -111,7 +103,6 @@ bool SearchService::PubSearch(const string& input, string& output) {
     if (result.size() > 5000)
         result.resize(5000);
 
-    std::sort(result.begin(), result.end(), sortByScore);
     EntitySearchResponse response;
     response.set_total_count(result.size());
     response.set_query(query);

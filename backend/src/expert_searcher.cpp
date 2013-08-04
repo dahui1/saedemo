@@ -34,7 +34,6 @@ SearchResult ExpertSearcher::search(string query)
         vector<vid_t> authorIDs;
         auto vi = g->Vertices();
         vi->MoveTo(item.docId);
-        auto pub = sae::serialization::convert_from_string<Publication>(vi->Data());
         for (auto edgeIt = vi->InEdges(); edgeIt->Alive(); edgeIt->Next()) {
             if (edgeIt->Typename() == "Publish") {
                 authorIDs.push_back(edgeIt->SourceId());
@@ -49,10 +48,7 @@ SearchResult ExpertSearcher::search(string query)
     // start caculation score using each feature
     for(auto& apubs : author_pubs)
     {
-        SupportDocFeatureParam param;
-        param.doc_id = apubs.first;
-        param.support_docs = apubs.second;
-
+        SupportDocFeatureParam param{apubs.first, apubs.second};
         QueryItem item{apubs.first, get_score(&param, g)};
         if (item.score > 30 || result.size() <= 5000)
              result.push_back(item);
