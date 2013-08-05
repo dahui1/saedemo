@@ -6,7 +6,7 @@ from saeclient import SAEClient
 
 import sample_data
 
-client = SAEClient("tcp://127.0.0.1:40111")
+client = SAEClient("tcp://127.0.0.1:40112")
 
 
 @route('/')
@@ -19,7 +19,7 @@ def index():
 def search(dataset):
     q = request.query.q or ''
     print 'searching', q, 'in academic'
-    result = client.entity_search(dataset, q)
+    result = client.author_search(dataset, q, 0, 20)
     print result
 
     return dict(
@@ -36,7 +36,7 @@ def search(dataset):
                 stats=dict(
                     (s.type, s.value) for s in e.stat
                 ),
-                topics=e.topics,
+                topics=e.topics.split(','),
                 imgurl=e.imgurl
             ) for e in result.entities
         ],
@@ -113,4 +113,4 @@ def static(path):
     curdir = os.path.dirname(os.path.realpath(__file__))
     return static_file(path, root=curdir + '/static/')
 
-run(server='auto', host='0.0.0.0', port=8082, reloader=True, debug=True)
+run(server='auto', host='0.0.0.0', port=8083, reloader=True, debug=True)

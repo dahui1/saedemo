@@ -24,6 +24,7 @@ void setup_services(RpcServer* server) {
     LOG(INFO) << "Binding aminer services...";
     auto b = make_binder(*service);
     server->addMethod("PubSearch", b(&SearchService::PubSearch));
+    server->addMethod("PubSearchByAuthor", b(&SearchService::PubSearchByAuthor));
     server->addMethod("AuthorSearch", b(&SearchService::AuthorSearch));
 
     LOG(INFO) << "AMiner services have been set up.";

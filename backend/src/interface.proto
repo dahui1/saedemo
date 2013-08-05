@@ -20,22 +20,11 @@ message DetailedEntity {
     repeated Stat stat = 5;
     optional string topics = 6;
     optional string imgurl = 7;
-
-}
-
-message ListItem {
-    required string text = 1;
-    required int32 id = 2;
-}
-
-message List {
-    required string title = 1;
-    repeated ListItem item = 2;
+    optional int32 original_id = 8;
 }
 
 message EntitySearchResponse {
     required string query = 1;
     required int32 total_count = 2;
     repeated DetailedEntity entity = 3;
-    repeated List extra_list = 4;
 }
