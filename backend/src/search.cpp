@@ -62,6 +62,30 @@ SearchService::SearchService(std::unique_ptr<AMinerData>&& data)
     : aminer(std::move(data)) {
 }
 
+bool SearchService::AuthorSearchById(const string& input, string& output) {
+    EntityDetailRequest request;
+    request.ParseFromString(input);
+
+    EntitySearchResponse response;
+    auto vi = aminer->g->Vertices();
+    string query = "";
+    int count = 0;
+    for (auto& aid : request.id()) {
+        vi->MoveTo(aid);
+        if (vi->TypeName() == "Author") {
+            auto a = parse<Author>(vi->Data());
+            DetailedEntity *de = response.add_entity();
+            de->set_id(aid);
+            fill_entity_by_author(de, a);
+            query += to_string(aid);
+            count ++;
+        }
+    }
+    response.set_query(query);
+    response.set_total_count(count);
+    return response.SerializeToString(&output);
+}
+
 bool SearchService::AuthorSearch(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
@@ -96,11 +120,13 @@ bool SearchService::PubSearchByAuthor(const string& input, string& output) {
     vit->MoveTo(aid);
     int count = 0;
     for (auto eit = vit->OutEdges(); eit->Alive(); eit->Next()) {
-        auto pub = aminer->get<Publication>(eit->TargetId());
-        DetailedEntity *de = response.add_entity();
-        de->set_id(eit->TargetId());
-        fill_entity_by_publication(de, pub);
-        count ++;
+        if (eit->TypeName() == "Publish") {
+            auto pub = aminer->get<Publication>(eit->TargetId());
+            DetailedEntity *de = response.add_entity();
+            de->set_id(eit->TargetId());
+            fill_entity_by_publication(de, pub);
+            count ++;
+        }
     }
 
     response.set_total_count(count);
@@ -132,5 +158,38 @@ bool SearchService::PubSearch(const string& input, string& output) {
         de->set_id(i.docId);
         de->set_description(p.abstract);
     }
+    return response.SerializeToString(&output);
+}
+
+bool SearchService::InfluenceSearchByAuthor(const string& input, string& output) {
+    EntitySearchRequest request;
+    request.ParseFromString(input);
+
+    InfluenceSearchResponse response;
+
+    auto aid = stoi(request.query());
+    response.set_entity_id(aid);
+
+    auto vit = aminer->g->Vertices();
+    vit->MoveTo(aid);
+    for (auto eit = vit->OutEdges(); eit->Alive(); eit->Next()) {
+        if (eit->TypeName() == "Influence") {
+            auto ai = parse<AuthorInfluence>(eit->Data());
+            Influence *inf = response.add_influence();
+            inf->set_id(eit->TargetId());
+            inf->set_topic(ai.topic);
+            inf->set_score(ai.score);
+        }
+    }
+    for (auto eit = vit->InEdges(); eit->Alive(); eit->Next()) {
+        if (eit->TypeName() == "Influence") {
+            auto ai = parse<AuthorInfluence>(eit->Data());
+            Influence *inf = response.add_influenced_by();
+            inf->set_id(eit->SourceId());
+            inf->set_topic(ai.topic);
+            inf->set_score(ai.score);
+        }
+    }
+
     return response.SerializeToString(&output);
 }

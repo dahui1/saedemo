@@ -7,6 +7,11 @@ message EntitySearchRequest {
     optional int32 count = 4;
 }
 
+message EntityDetailRequest {
+    required string dataset = 1;
+    repeated int32 id = 2;
+}
+
 message Stat {
     required string type = 1;
     required int32 value = 2;
@@ -27,4 +32,16 @@ message EntitySearchResponse {
     required string query = 1;
     required int32 total_count = 2;
     repeated DetailedEntity entity = 3;
+}
+
+message Influence {
+    required int32 id = 1;
+    required int32 topic = 2;
+    required double score = 3;
+}
+
+message InfluenceSearchResponse {
+    required int32 entity_id = 1;
+    repeated Influence influence = 2;
+    repeated Influence influenced_by = 3;
 }

@@ -84,6 +84,7 @@ int main() {
     builder.AddVertexDataType("JConf");
     builder.AddEdgeDataType("Publish");
     builder.AddEdgeDataType("Appear");
+    builder.AddEdgeDataType("Influence");
 
     // build Authors
     cerr << "building authors..." << endl;
@@ -205,6 +206,20 @@ int main() {
                 continue;
             }
             builder.AddEdge(AUTHOR_BASE + aid, PUBLICATION_BASE + pid, ap, "Publish");
+        }
+    }
+
+    cerr << "building influence graph..." << endl;
+    {
+        ifstream influence("influence_all.txt");
+        AuthorInfluence ai;
+        int source, target;
+        while (influence >> source >> target >> ai.topic >> ai.score) {
+            if (aid_map.find(source) == aid_map.end() || aid_map.find(target) == aid_map.end()) {
+                cerr << "Author not found: " << source << ", " << target << endl;
+                continue;
+            }
+            builder.AddEdge(AUTHOR_BASE + source, AUTHOR_BASE + target, ai, "Influence");
         }
     }
 

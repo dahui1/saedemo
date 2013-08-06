@@ -26,6 +26,8 @@ void setup_services(RpcServer* server) {
     server->addMethod("PubSearch", b(&SearchService::PubSearch));
     server->addMethod("PubSearchByAuthor", b(&SearchService::PubSearchByAuthor));
     server->addMethod("AuthorSearch", b(&SearchService::AuthorSearch));
+    server->addMethod("AuthorSearchById", b(&SearchService::AuthorSearchById));
+    server->addMethod("InfluenceSearchByAuthor", b(&SearchService::InfluenceSearchByAuthor));
 
     LOG(INFO) << "AMiner services have been set up.";
 }

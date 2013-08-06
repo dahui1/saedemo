@@ -35,6 +35,15 @@ class SAEClient(object):
     def echo_test(self, s):
         return request(self.endpoint, "echo_test", s)
 
+    def author_search_by_id(self, dataset, aids):
+        r = interface_pb2.EntityDetailRequest()
+        r.dataset = dataset
+        r.id.extend(aids)
+        response = pbrequest(self.endpoint, "AuthorSearchById", r)
+        er = interface_pb2.EntitySearchResponse()
+        er.ParseFromString(response)
+        return er
+
     def author_search(self, dataset, query, offset=0, count=20):
         r = interface_pb2.EntitySearchRequest()
         r.dataset = dataset
@@ -78,6 +87,15 @@ class SAEClient(object):
         er = interface_pb2.EntitySearchResponse()
         er.query = query
         er.total_count = 0
+        return er
+
+    def influence_search_by_author(self, dataset, aid):
+        r = interface_pb2.EntitySearchRequest()
+        r.dataset = dataset
+        r.query = str(aid)
+        response = pbrequest(self.endpoint, "InfluenceSearchByAuthor", r)
+        er = interface_pb2.InfluenceSearchResponse()
+        er.ParseFromString(response)
         return er
 
 
