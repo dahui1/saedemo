@@ -128,14 +128,15 @@ int main() {
     {
         ifstream pubs("publication.txt");
         ifstream pub_ext("publication_ext.txt");
-        Publication p;
 
-        int tmp_id;
+        int pid, tmp_id;
         string tmp_abstract;
         pub_ext >> tmp_id;
         getline(pub_ext.ignore(), tmp_abstract);
 
-        while (pubs >> p.id) {
+        while (pubs >> pid) {
+            Publication p;
+            p.id = pid;
             if (p.id % 10000 == 0) {
                 cerr << "publication" << p.id << std::endl;
             }
