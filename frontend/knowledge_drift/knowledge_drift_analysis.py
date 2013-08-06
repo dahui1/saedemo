@@ -16,7 +16,6 @@ import networkx as nx
 import logging
 from sklearn.cluster import Ward, KMeans, MiniBatchKMeans, spectral_clustering
 
-data_center = DataCenterClient("tcp://10.1.1.211:32011")
 client = SAEClient("tcp://10.1.1.111:40114")
 term_extractor = TermExtractorClient()
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
@@ -27,7 +26,7 @@ class KnowledgeDrift(object):
                            "difficult learning problem", "user query", "case study", 
                            "web page", "data source", "proposed algorithm", 
                            "proposed method", "real data", "international conference",
-                           "proposed approach"]
+                           "proposed approach","access control"]
 
     def init_topic_trend(self):
         print "INIT TOPIC TREND"
@@ -140,7 +139,7 @@ class KnowledgeDrift(object):
             publication_year = p.stat[0].value
             if publication_year >= start_time and publication_year <= end_time:
                 self.set_time(publication_year)
-                text += (p.title.lower() + " . " + p.description.lower() +" . ")
+                text += (p.title.lower() + " . " )#+ p.description.lower() +" . ")
                 #insert document
                 self.append_documents(p)
         return text
@@ -158,7 +157,9 @@ class KnowledgeDrift(object):
             #search for document
             text = self.search_document_by_author(a, start_time=start_time, end_time=end_time)
             #extract terms
+            print text
             terms = term_extractor.extractTerms(text)
+            print terms
             for t in terms:
                 if t not in self.stop_words:
                     term_set.add(t)
@@ -492,7 +493,7 @@ class KnowledgeDrift(object):
             term_index = self.term_index[t]
             term_year = defaultdict(list)
             for d in self.reverse_term_dict[term_index]:
-                term_year[self.document_list[d].year].append(d)
+                term_year[self.document_list[d].stat[0].value].append(d)
             sorted_term_year = sorted(term_year.items(), key=lambda t:t[0])
             if len(sorted_term_year) == 0:
                 continue
@@ -534,8 +535,8 @@ class KnowledgeDrift(object):
         #document
         for i, doc in enumerate(self.document_list):
             self.graph["documents"].append({"idx":i, "id":int(doc.id), "title":doc.title, 
-                                           "year":int(doc.year), "jconf":doc.jconf_name, #"abs":doc.abs,
-                                           "cite":int(doc.n_citations)})#, "authors":doc.author_ids, "topic":doc.topic})
+                                           "year":int(doc.stat[0].value), #"jconf":doc.jconf_name, #"abs":doc.abs,
+                                           "cite":int(doc.stat[2].value)})#, "authors":doc.author_ids, "topic":doc.topic})
         #time slides
         self.graph["time_slides"] = self.time_slides
         return self.graph
