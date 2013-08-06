@@ -11,7 +11,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = descriptor.FileDescriptor(
   name='interface.proto',
   package='demoserver',
-  serialized_pb='\n\x0finterface.proto\x12\ndemoserver\"T\n\x13\x45ntitySearchRequest\x12\x0f\n\x07\x64\x61taset\x18\x01 \x02(\t\x12\r\n\x05query\x18\x02 \x02(\t\x12\x0e\n\x06offset\x18\x03 \x01(\x05\x12\r\n\x05\x63ount\x18\x04 \x01(\x05\"2\n\x13\x45ntityDetailRequest\x12\x0f\n\x07\x64\x61taset\x18\x01 \x02(\t\x12\n\n\x02id\x18\x02 \x03(\x05\"#\n\x04Stat\x12\x0c\n\x04type\x18\x01 \x02(\t\x12\r\n\x05value\x18\x02 \x02(\x05\"\xa2\x01\n\x0e\x44\x65tailedEntity\x12\r\n\x05title\x18\x01 \x02(\t\x12\n\n\x02id\x18\x02 \x02(\x05\x12\x0b\n\x03url\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\x12\x1e\n\x04stat\x18\x05 \x03(\x0b\x32\x10.demoserver.Stat\x12\x0e\n\x06topics\x18\x06 \x01(\t\x12\x0e\n\x06imgurl\x18\x07 \x01(\t\x12\x13\n\x0boriginal_id\x18\x08 \x01(\x05\"f\n\x14\x45ntitySearchResponse\x12\r\n\x05query\x18\x01 \x02(\t\x12\x13\n\x0btotal_count\x18\x02 \x02(\x05\x12*\n\x06\x65ntity\x18\x03 \x03(\x0b\x32\x1a.demoserver.DetailedEntity\"5\n\tInfluence\x12\n\n\x02id\x18\x01 \x02(\x05\x12\r\n\x05topic\x18\x02 \x02(\x05\x12\r\n\x05score\x18\x03 \x02(\x01\"\x84\x01\n\x17InfluenceSearchResponse\x12\x11\n\tentity_id\x18\x01 \x02(\x05\x12(\n\tinfluence\x18\x02 \x03(\x0b\x32\x15.demoserver.Influence\x12,\n\rinfluenced_by\x18\x03 \x03(\x0b\x32\x15.demoserver.Influence')
+  serialized_pb='\n\x0finterface.proto\x12\ndemoserver\"T\n\x13\x45ntitySearchRequest\x12\x0f\n\x07\x64\x61taset\x18\x01 \x02(\t\x12\r\n\x05query\x18\x02 \x02(\t\x12\x0e\n\x06offset\x18\x03 \x01(\x05\x12\r\n\x05\x63ount\x18\x04 \x01(\x05\"2\n\x13\x45ntityDetailRequest\x12\x0f\n\x07\x64\x61taset\x18\x01 \x02(\t\x12\n\n\x02id\x18\x02 \x03(\x05\"#\n\x04Stat\x12\x0c\n\x04type\x18\x01 \x02(\t\x12\r\n\x05value\x18\x02 \x02(\x05\")\n\rRelatedEntity\x12\x0c\n\x04type\x18\x01 \x02(\t\x12\n\n\x02id\x18\x02 \x03(\x05\"\xd5\x01\n\x0e\x44\x65tailedEntity\x12\r\n\x05title\x18\x01 \x02(\t\x12\n\n\x02id\x18\x02 \x02(\x05\x12\x0b\n\x03url\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\x12\x1e\n\x04stat\x18\x05 \x03(\x0b\x32\x10.demoserver.Stat\x12\x0e\n\x06topics\x18\x06 \x01(\t\x12\x0e\n\x06imgurl\x18\x07 \x01(\t\x12\x13\n\x0boriginal_id\x18\x08 \x01(\x05\x12\x31\n\x0erelated_entity\x18\t \x03(\x0b\x32\x19.demoserver.RelatedEntity\"f\n\x14\x45ntitySearchResponse\x12\r\n\x05query\x18\x01 \x02(\t\x12\x13\n\x0btotal_count\x18\x02 \x02(\x05\x12*\n\x06\x65ntity\x18\x03 \x03(\x0b\x32\x1a.demoserver.DetailedEntity\"5\n\tInfluence\x12\n\n\x02id\x18\x01 \x02(\x05\x12\r\n\x05topic\x18\x02 \x02(\x05\x12\r\n\x05score\x18\x03 \x02(\x01\"\x84\x01\n\x17InfluenceSearchResponse\x12\x11\n\tentity_id\x18\x01 \x02(\x05\x12(\n\tinfluence\x18\x02 \x03(\x0b\x32\x15.demoserver.Influence\x12,\n\rinfluenced_by\x18\x03 \x03(\x0b\x32\x15.demoserver.Influence')
 
 
 
@@ -135,6 +135,41 @@ _STAT = descriptor.Descriptor(
 )
 
 
+_RELATEDENTITY = descriptor.Descriptor(
+  name='RelatedEntity',
+  full_name='demoserver.RelatedEntity',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='type', full_name='demoserver.RelatedEntity.type', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='id', full_name='demoserver.RelatedEntity.id', index=1,
+      number=2, type=5, cpp_type=1, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=206,
+  serialized_end=247,
+)
+
+
 _DETAILEDENTITY = descriptor.Descriptor(
   name='DetailedEntity',
   full_name='demoserver.DetailedEntity',
@@ -198,6 +233,13 @@ _DETAILEDENTITY = descriptor.Descriptor(
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
+    descriptor.FieldDescriptor(
+      name='related_entity', full_name='demoserver.DetailedEntity.related_entity', index=8,
+      number=9, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
   ],
   extensions=[
   ],
@@ -207,8 +249,8 @@ _DETAILEDENTITY = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=207,
-  serialized_end=369,
+  serialized_start=250,
+  serialized_end=463,
 )
 
 
@@ -249,8 +291,8 @@ _ENTITYSEARCHRESPONSE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=371,
-  serialized_end=473,
+  serialized_start=465,
+  serialized_end=567,
 )
 
 
@@ -291,8 +333,8 @@ _INFLUENCE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=475,
-  serialized_end=528,
+  serialized_start=569,
+  serialized_end=622,
 )
 
 
@@ -333,17 +375,19 @@ _INFLUENCESEARCHRESPONSE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=531,
-  serialized_end=663,
+  serialized_start=625,
+  serialized_end=757,
 )
 
 _DETAILEDENTITY.fields_by_name['stat'].message_type = _STAT
+_DETAILEDENTITY.fields_by_name['related_entity'].message_type = _RELATEDENTITY
 _ENTITYSEARCHRESPONSE.fields_by_name['entity'].message_type = _DETAILEDENTITY
 _INFLUENCESEARCHRESPONSE.fields_by_name['influence'].message_type = _INFLUENCE
 _INFLUENCESEARCHRESPONSE.fields_by_name['influenced_by'].message_type = _INFLUENCE
 DESCRIPTOR.message_types_by_name['EntitySearchRequest'] = _ENTITYSEARCHREQUEST
 DESCRIPTOR.message_types_by_name['EntityDetailRequest'] = _ENTITYDETAILREQUEST
 DESCRIPTOR.message_types_by_name['Stat'] = _STAT
+DESCRIPTOR.message_types_by_name['RelatedEntity'] = _RELATEDENTITY
 DESCRIPTOR.message_types_by_name['DetailedEntity'] = _DETAILEDENTITY
 DESCRIPTOR.message_types_by_name['EntitySearchResponse'] = _ENTITYSEARCHRESPONSE
 DESCRIPTOR.message_types_by_name['Influence'] = _INFLUENCE
@@ -366,6 +410,12 @@ class Stat(message.Message):
   DESCRIPTOR = _STAT
   
   # @@protoc_insertion_point(class_scope:demoserver.Stat)
+
+class RelatedEntity(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _RELATEDENTITY
+  
+  # @@protoc_insertion_point(class_scope:demoserver.RelatedEntity)
 
 class DetailedEntity(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType

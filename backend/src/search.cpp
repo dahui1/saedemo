@@ -121,10 +121,21 @@ bool SearchService::PubSearchByAuthor(const string& input, string& output) {
     int count = 0;
     for (auto eit = vit->OutEdges(); eit->Alive(); eit->Next()) {
         if (eit->TypeName() == "Publish") {
-            auto pub = aminer->get<Publication>(eit->TargetId());
+            auto vi = aminer->g->Vertices();
+            vi->MoveTo(eit->TargetId());
+            auto pub = parse<Publication>(vi->Data());
             DetailedEntity *de = response.add_entity();
             de->set_id(eit->TargetId());
             fill_entity_by_publication(de, pub);
+
+            auto re = de->add_related_entity();
+            re->set_type("Author");
+            for (auto ei = vi->InEdges(); ei->Alive(); ei->Next()) {
+                if (ei->TypeName() == "Publish") {
+                    re->add_id(ei->SourceId());
+                }
+            }
+
             count ++;
         }
     }
@@ -153,10 +164,19 @@ bool SearchService::PubSearch(const string& input, string& output) {
     for (int ri = offset; ri < result.size() && ri - offset < count; ri++) {
         auto i = result[ri];
         DetailedEntity *de = response.add_entity();
-        auto p = aminer->get<Publication>(i.docId);
-        de->set_title(p.title);
+        auto vi = aminer->g->Vertices();
+        vi->MoveTo(i.docId);
+        auto p = parse<Publication>(vi->Data());
         de->set_id(i.docId);
-        de->set_description(p.abstract);
+        fill_entity_by_publication(de, p);
+
+        auto re = de->add_related_entity();
+        re->set_type("Author");
+        for (auto ei = vi->InEdges(); ei->Alive(); ei->Next()) {
+            if (ei->TypeName() == "Publish") {
+                re->add_id(ei->SourceId());
+            }
+        }
     }
     return response.SerializeToString(&output);
 }

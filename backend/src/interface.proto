@@ -17,6 +17,11 @@ message Stat {
     required int32 value = 2;
 }
 
+message RelatedEntity {
+    required string type = 1;
+    repeated int32 id = 2;
+}
+
 message DetailedEntity {
     required string title = 1;
     required int32 id = 2;
@@ -26,6 +31,7 @@ message DetailedEntity {
     optional string topics = 6;
     optional string imgurl = 7;
     optional int32 original_id = 8;
+    repeated RelatedEntity related_entity = 9;
 }
 
 message EntitySearchResponse {
