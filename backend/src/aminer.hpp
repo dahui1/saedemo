@@ -42,6 +42,11 @@ struct PublicationJConf {
     // Noop
 };
 
+struct AuthorInfluence {
+    int topic;
+    double score;
+};
+
 namespace sae {
     namespace serialization {
         namespace custom_serialization_impl {

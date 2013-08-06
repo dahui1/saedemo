@@ -35,36 +35,72 @@ class SAEClient(object):
     def echo_test(self, s):
         return request(self.endpoint, "echo_test", s)
 
-    def author_search(self, dataset, query):
+    def author_search_by_id(self, dataset, aids):
+        r = interface_pb2.EntityDetailRequest()
+        r.dataset = dataset
+        r.id.extend(aids)
+        response = pbrequest(self.endpoint, "AuthorSearchById", r)
+        er = interface_pb2.EntitySearchResponse()
+        er.ParseFromString(response)
+        return er
+
+    def author_search(self, dataset, query, offset=0, count=20):
         r = interface_pb2.EntitySearchRequest()
         r.dataset = dataset
         r.query = query
+        r.offset = offset
+        r.count = count
         response = pbrequest(self.endpoint, "AuthorSearch", r)
         er = interface_pb2.EntitySearchResponse()
         er.ParseFromString(response)
         return er
 
-    def pub_search(self, dataset, query):
+    def pub_search_by_author(self, dataset, author_id, offset=0, count=20):
+        r = interface_pb2.EntitySearchRequest()
+        r.dataset = dataset
+        r.query = str(author_id)
+        r.offset = offset
+        r.count = count
+        response = pbrequest(self.endpoint, "PubSearchByAuthor", r)
+        er = interface_pb2.EntitySearchResponse()
+        er.ParseFromString(response)
+        return er
+
+    def pub_search(self, dataset, query, offset=0, count=20):
         r = interface_pb2.EntitySearchRequest()
         r.dataset = dataset
         r.query = query
+        r.offset = offset
+        r.count = count
         response = pbrequest(self.endpoint, "PubSearch", r)
         er = interface_pb2.EntitySearchResponse()
         er.ParseFromString(response)
         return er
 
-    def entity_search(self, dataset, query):
+    def jconf_search(self, dataset, query, offset=0, count=20):
         r = interface_pb2.EntitySearchRequest()
         r.dataset = dataset
         r.query = query
-        response = pbrequest(self.endpoint, "AuthorPubSearch", r)
+        r.offset = offset
+        r.count = count
+        response = pbrequest(self.endpoint, "JConfSearch", r)
         er = interface_pb2.EntitySearchResponse()
+        er.query = query
+        er.total_count = 0
+        return er
+
+    def influence_search_by_author(self, dataset, aid):
+        r = interface_pb2.EntitySearchRequest()
+        r.dataset = dataset
+        r.query = str(aid)
+        response = pbrequest(self.endpoint, "InfluenceSearchByAuthor", r)
+        er = interface_pb2.InfluenceSearchResponse()
         er.ParseFromString(response)
         return er
 
 
 def main():
-    c = SAEClient("tcp://localhost:40111")
+    c = SAEClient("tcp://localhost:40112")
     print c.author_search("academic", "data mining")
 
 

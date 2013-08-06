@@ -19,7 +19,7 @@ file (GLOB server_SOURCES
 add_executable(server ${server_SOURCES} ${PROTO_SRCS} ${PROTO_HDRS})
 target_link_libraries(server RpcServer glog gflags ${PROTOBUF_LIBRARY} aminerdata)
 
-file (GLOB aminerimporter_SOURCES "aminerimporter.cpp")
+file (GLOB aminerimporter_SOURCES "aminerimporter.cpp" "csvreader.*")
 add_executable(aminerimporter ${aminerimporter_SOURCES})
 target_link_libraries(aminerimporter mgraph)
 

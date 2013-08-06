@@ -15,13 +15,7 @@ inline T parse(const string& data) {
 
 struct AMinerData {
     AMinerData(char const * prefix);
-
-    ~AMinerData() {
-    }
-
-    sae::io::MappedGraph* getGraph() const {
-        return g.get();
-    }
+    ~AMinerData();
 
     template<typename T>
     T get(sae::io::vid_t id) const {
@@ -30,7 +24,7 @@ struct AMinerData {
         return parse<T>(vi->Data());
     }
 
-    indexing::SearchResult search_publications(const string& query) const;
+    indexing::SearchResult search_publications(const string& query, int limit = 5000) const;
 
     std::vector<indexing::Index> pub_index_shards;
     std::unique_ptr<sae::io::MappedGraph> g;
