@@ -130,15 +130,16 @@ class KnowledgeDrift(object):
         return self.render_topic_graph(choose_topic)   
 
     def search_document_by_author(self, a, start_time=0, end_time=10000):
-        logging.info("querying documents for %s from %s to %s" % (a.names, start_time, end_time))
-        result = client.pub_search_by_author(a.id)
-        logging.info("found %s documents" % len(result.entities))
+        logging.info("querying documents for %s from %s to %s" % (a.title, start_time, end_time))
+        result = client.pub_search_by_author("academic", a.id)
+        logging.info("found %s documents" % len(result.entity))
         #text for extract key terms
         text = ""
-        for p in result.entities:
+        for p in result.entity:
             #update time info
-            if p.year >= start_time and p.year <= end_time:
-                self.set_time(p.year)
+            publication_year = p.stat[0].value
+            if publication_year >= start_time and publication_year <= end_time:
+                self.set_time(publication_year)
                 text += (p.title.lower() + " . " + p.description.lower() +" . ")
                 #insert document
                 self.append_documents(p)
@@ -148,7 +149,7 @@ class KnowledgeDrift(object):
         print q, time_window, start_time, end_time
         self.author_result = []
         for qu in q:
-            self.author_result.extend(client.author_search("academic", q))
+            self.author_result.extend(client.author_search("academic", qu).entity)
         term_set = set()
         index = 0
         for a in self.author_result:
@@ -234,7 +235,7 @@ class KnowledgeDrift(object):
 
     def append_documents(self, p):
         self.document_list.append(p)
-        self.document_list_given_time[p.year].append(p.id)
+        self.document_list_given_time[p.stat[0].value].append(p.id)
         self.document_index[p.id] = self.num_documents
         self.num_documents += 1
 
@@ -247,7 +248,7 @@ class KnowledgeDrift(object):
             for d in self.document_list_given_time[y]:
                 text = (self.document_list[self.document_index[d]].title.lower()
                         + " . " 
-                        + self.document_list[self.document_index[d]].abs.lower())
+                        + self.document_list[self.document_index[d]].description.lower())
                 for t in range(self.num_terms):
                     if self.term_list[t] in text:
                         self.term_freq[t] += 1
@@ -267,7 +268,7 @@ class KnowledgeDrift(object):
                 for d in self.document_list_given_time[y]:
                     for t in self.term_freq_given_document[self.document_index[d]]:
                         self.term_freq_given_time[i, t] += 1
-                        for a in self.document_list[self.document_index[d]].author_ids:
+                        for a in self.document_list[self.document_index[d]].related_entity[0].id:
                             if self.author_index.has_key(a):
                                 self.term_freq_given_person[t, self.author_index[a]] += 1
                                 self.term_freq_given_person_time[i][t, self.author_index[a]] += 1
@@ -292,7 +293,7 @@ class KnowledgeDrift(object):
                         if self.term_list[t] in text:
                             self.term_freq[t] += 1
                             self.term_freq_given_time[i, t] += 1
-                            for a in self.document_list[self.document_index[d]].author_ids:
+                            for a in self.document_list[self.document_index[d]].related_entity[0].id:
                                 if self.author_index.has_key(a):
                                     #logging.info("i:%s,y:%s,d:%s,text:%s,t:%s,a:%s"%(i,y,d,text,t,a))
                                     self.term_freq_given_person[t, self.author_index[a]] += 1
