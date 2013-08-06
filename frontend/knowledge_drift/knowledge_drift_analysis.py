@@ -1,9 +1,9 @@
 import sys
 sys.path.append("../")
 
-from dcclient.dcclient import DataCenterClient
-from teclient.teclient import TermExtractorClient
-from sae_client import SAEClient
+from dcclient import DataCenterClient
+from teclient import TermExtractorClient
+from saeclient import SAEClient
 
 from utils.algorithms import *
 from collections import defaultdict
@@ -17,7 +17,7 @@ import logging
 from sklearn.cluster import Ward, KMeans, MiniBatchKMeans, spectral_clustering
 
 data_center = DataCenterClient("tcp://10.1.1.211:32011")
-client = SAEClient("tcp://10.1.1.111:40111")
+client = SAEClient("tcp://10.1.1.111:40114")
 term_extractor = TermExtractorClient()
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
