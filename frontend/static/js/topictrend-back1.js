@@ -92,24 +92,30 @@ function render_topic(q, start, end) {
 
 	$("#chart").addClass("loading");
 
-	
 	d3.json("/academic/terms?q=" + q + "&start=" + start + "&end=" + end, function(energy) {
 		$("#chart").removeClass("loading");
 		//data transformation
 		var terms = {};
 		max_sum = 0;
 		energy.terms.forEach(function(t) {
-			t.sum = 0;
+			term = {};
+			term.t = t.t;
+			term.freq = t.freq;
+			term.dist = t.dist;
+			term.year = t.year;
+			term.sum = 0;
+			term.cluster = t.cluster;
 			//wangxiao
 			t.year.forEach(function(tt){
 				if ((tt.y>2010)&&(tt.d>0)) {
-					t.sum+=tt.d;
+					term.sum+=tt.d;
 				}
 			});
-			if (t.sum > max_sum) {
-				max_sum = t.sum;
+			if (term.sum > max_sum) {
+				max_sum = term.sum;
 			};
-			terms[t.t] = t;
+			t.sum = term.sum;
+			terms[t.t] = term;
 		})
 
 		var people = {};
@@ -118,7 +124,7 @@ function render_topic(q, start, end) {
 		})
 
 		timeline.attr("height", function(d) {
-			return 25 * energy.terms.length;
+			return 20 * energy.terms.length;
 		})
 
 		//right box, hist diagram
@@ -126,9 +132,7 @@ function render_topic(q, start, end) {
 			.attr("x1", bar_pos + 10)
 			.attr("x2", bar_pos + 10)
 			.attr("y1", 0)
-			.attr("y2", function(){
-				return 25 * energy.terms.length;
-			})
+			.attr("y2", 1000)
 			.style("stroke", "gray")
 			.style("stroke-width", .5);
 
@@ -138,29 +142,138 @@ function render_topic(q, start, end) {
 				max_freq = d.freq;
 			}
 		});
-//flagD
+
 		d3.select("#nav").style("display","");
 		d3.select(".active").classed("active",false);
 		d3.select($("#first-three").parent()[0]).classed("active","true");
 		
-		function draw_right_box(){
+
+		// var hist =
+		// 	timeline.append("g")
+		// 	.selectAll(".term")
+		// 	.data(energy.terms)
+		// 	.enter()
+		// 	.append("g")
+		// 	.attr("class", "term")
+		// 	.attr("id", function(d){
+		// 		return "term-"+d.idx;
+		// 	})
+		// 	.attr("transform", function(d, i) {
+		// 		if(d.t == q){
+		// 			d3.select(this)
+		// 			.append("rect")
+		// 			.attr("class","strong")
+		// 			.attr("x","0px")
+		// 			.attr("y",SVGRect.y)
+		// 			.attr("width", "300px")
+		// 			.attr("height", SVGRect.height)
+		// 			.style("fill","#9900FF")
+		// 			.style("fill-opacity", 0.2);
+		// 		}
+		// 		return "translate(" + [0, i * timeline_item_offset + 20] + ")rotate(" + 0 + ")";
+		// 	})
+		// 	.on("click", function(d) {
+		// 		draw_flow(d);
+		// 	})
+
+		function draw_right_box() {
 			energy.terms.sort(function(a,b){return b.sum-a.sum})
 			var hist =
-			timeline.append("g")
-			.selectAll(".term")
-			.data(energy.terms)
-			.enter()
-			.append("g")
-			.attr("class", "term")
-			.attr("transform", function(d, i) {
-				return "translate(" + [0, i * timeline_item_offset + 20] + ")rotate(" + 0 + ")";
+				timeline.append("g")
+				.selectAll(".term")
+				.data(energy.terms)
+				.enter()
+				.append("g")
+				.attr("class", "term")
+				.attr("transform", function(d, i) {
+					return "translate(" + [0, i * timeline_item_offset + 20] + ")rotate(" + 0 + ")";
+				})
+				.on("click", function(d) {
+					draw_flow(d);
+					SVGRect = this.getBBox();
+					d3.select(".strong")
+						.remove()
+					d3.select(this)
+						.append("rect")
+						.attr("class", "strong")
+						.attr("x", "0px")
+						.attr("y", SVGRect.y)
+						.attr("width", "300px")
+						.attr("height", SVGRect.height)
+						.style("fill", "#9900FF")
+						.style("fill-opacity", 0.2);
+				})
+
+			hist.append("rect")
+				.attr("x", function(d) {
+					return bar_pos + 10;
+				})
+				.attr("y", function(d) {
+					return 0;
+				})
+				.attr("height", 18)
+				.attr("width", function(d) {
+					return hist_height * d.freq / max_freq;
+				})
+				.style("fill-opacity", 0.7)
+				.style("fill", "#60aFe9")
+				.append("svg:title")
+				.text(function(d) {
+					return d.sum;
+				});
+
+			hist.append("text")
+				.attr("text-anchor", "end")
+				.attr("transform", function(d) {
+					return "translate(" + [bar_pos, 0] + ")rotate(" + 0 + ")";
+				})
+				.style("font-size", 12)
+				.attr("dy", ".85em")
+				.text(function(d) {
+					return d.t;
+				})
+		}
+
+		draw_right_box();
+		d3.select("#revert").on("click", function(e) {
+			d3.selectAll(".term").remove();
+			energy.terms.sort(function(a, b) {
+				return b.freq - a.freq
+			});
+			draw_right_box();
+		})
+		//flag
+		d3.select("#first-three").on("click", function(e) {
+			d3.selectAll(".term").remove();
+			energy.terms.sort(function(a, b) {
+				return b.sum - a.sum
 			})
-			.attr("id", function(d){
-				return "term-"+d.idx;
-			})
-			.on("click", function(d) {
-				draw_flow(d);
-			})
+
+			var hist =
+				timeline.append("g")
+				.selectAll(".term")
+				.data(energy.terms)
+				.enter()
+				.append("g")
+				.attr("class", "term")
+				.attr("transform", function(d, i) {
+					return "translate(" + [0, i * timeline_item_offset + 20] + ")rotate(" + 0 + ")";
+				})
+				.on("click", function(d) {
+					draw_flow(d);
+					SVGRect = this.getBBox();
+					d3.select(".strong")
+						.remove()
+					d3.select(this)
+						.append("rect")
+						.attr("class", "strong")
+						.attr("x", "0px")
+						.attr("y", SVGRect.y)
+						.attr("width", "300px")
+						.attr("height", SVGRect.height)
+						.style("fill", "#9900FF")
+						.style("fill-opacity", 0.2);
+				})
 
 			hist.append("rect")
 				.attr("x", function(d) {
@@ -176,67 +289,9 @@ function render_topic(q, start, end) {
 				.style("fill-opacity", 0.7)
 				.style("fill", "#60aFe9")
 				.append("svg:title")
-				.text(function(d) { return d.sum; });
-	
-			hist.append("text")
-				.attr("text-anchor", "end")
-				.attr("transform", function(d) {
-					return "translate(" + [bar_pos, 0] + ")rotate(" + 0 + ")";
-				})
-				.style("font-size", 12)
-				.attr("dy", ".85em")
 				.text(function(d) {
-					return d.t;
-				})
-		}
-		draw_right_box();
-		d3.select("#first-three").on("click", function(e){
-			d3.select(".active").classed("active",false);
-			d3.select(this.parentNode).classed("active",true);
-			d3.selectAll(".term").remove();
-			energy.terms.sort(function(a,b){return b.freq-a.freq});
-			draw_right_box();
-			draw_flow(terms[q]);
-		})
-//flag
-		d3.select("#revert").on("click", function(e) {
-			d3.select(".active").classed("active",false);
-			d3.select(this.parentNode).classed("active","true");
-			d3.selectAll(".term").remove();
-			energy.terms.sort(function(a,b){return b.freq-a.freq})
-
-			var hist =
-				timeline.append("g")
-				.selectAll(".term")
-				.data(energy.terms)
-				.enter()
-				.append("g")
-				.attr("class", "term")
-				.attr("id", function(d){
-					return "term-"+d.idx;
-				})
-				.attr("transform", function(d, i) {
-					return "translate(" + [0, i * timeline_item_offset + 20] + ")rotate(" + 0 + ")";
-			})
-			.on("click", function(d) {
-				draw_flow(d);
-			})
-			
-			hist.append("rect")
-				.attr("x", function(d) {
-					return bar_pos + 10;
-				})
-				.attr("y", function(d) {
-					return 0;
-				})
-				.attr("height", 18)
-				.attr("width", function(d) {
-					return hist_height * d.freq / max_freq;
-				})
-				.style("fill-opacity", 0.7)
-				.style("fill", "#60aFe9")
-				.append("svg:title")
-				.text(function(d) { return d.sum; });
+					return d.sum;
+				});
 
 			hist.append("text")
 				.attr("text-anchor", "end")
@@ -248,8 +303,64 @@ function render_topic(q, start, end) {
 				.text(function(d) {
 					return d.t;
 				})
-			draw_flow(terms[q]);
 		})
+		// d3.select("#first-three").on("click", function(e) {
+		// 	d3.selectAll(".term").remove();
+		// 	energy.terms.sort(function(a, b) {
+		// 		return b.sum - a.sum
+		// 	})
+
+		// 	var hist =
+		// 		timeline.append("g")
+		// 		.selectAll(".term")
+		// 		.data(energy.terms)
+		// 		.enter()
+		// 		.append("g")
+		// 		.attr("class", "term")
+		// 		.attr("transform", function(d, i) {
+		// 			return "translate(" + [0, i * timeline_item_offset + 20] + ")rotate(" + 0 + ")";
+		// 		})
+		// 		.on("click", function(d) {
+		// 			draw_flow(d);
+		// 			SVGRect = this.getBBox();
+		// 			d3.select(".strong")
+		// 				.remove()
+		// 			d3.select(this)
+		// 				.append("rect")
+		// 				.attr("class", "strong")
+		// 				.attr("x", "0px")
+		// 				.attr("y", SVGRect.y)
+		// 				.attr("width", "300px")
+		// 				.attr("height", SVGRect.height)
+		// 				.style("fill", "#9900FF")
+		// 				.style("fill-opacity", 0.2);
+		// 		})
+
+		// 	hist.append("rect")
+		// 		.attr("x", function(d) {
+		// 			return bar_pos + 10;
+		// 		})
+		// 		.attr("y", function(d) {
+		// 			return 0;
+		// 		})
+		// 		.attr("height", 18)
+		// 		.attr("width", function(d) {
+		// 			return hist_height * d.freq / max_freq;
+		// 		})
+		// 		.style("fill-opacity", 0.7)
+		// 		.style("fill", "#60aFe9");
+
+		// 	hist.append("text")
+		// 		.attr("text-anchor", "end")
+		// 		.attr("transform", function(d) {
+		// 			return "translate(" + [bar_pos, 0] + ")rotate(" + 0 + ")";
+		// 		})
+		// 		.style("font-size", 12)
+		// 		.attr("dy", ".85em")
+		// 		.text(function(d) {
+		// 			return d.t;
+		// 		})
+
 
 		var time_slides_dict = {};
 		var time_slides_offset = {};
@@ -286,7 +397,7 @@ function render_topic(q, start, end) {
 				return 0;
 			})
 			.attr("y2", function(d) {
-				return 1000;
+				return height;
 			})
 			.style("stroke", function(d) {
 				return "lightgray";
@@ -384,9 +495,9 @@ function render_topic(q, start, end) {
 			.style("stroke", function(d) {
 				return d.color;
 			}) //d3.rgb(d.color).darker(2); })
-			.style("stroke-width", function(d) {
-				return 0;
-			})
+		.style("stroke-width", function(d) {
+			return 0;
+		})
 			.style("opacity", function(d) {
 				return 0.6;
 			})
@@ -474,28 +585,38 @@ function render_topic(q, start, end) {
 			.attr("transform", function(d) {
 				return "translate(" + [0, 350] + ")rotate(" + 0 + ")";
 			})
-
 		var draw_flow = function(data) {
 			flow.remove();
 			flow = chart.append("g")
 				.attr("transform", function(d) {
 					return "translate(" + [0, 350] + ")rotate(" + 0 + ")";
 				});
-
 			d3.select(".strong").remove()
-			d3.select("#term-"+data.idx)
+			// SVGRect = d3.select("#term-"+data.idx).getBBox();
+			d3.select("#term-" + data.idx)
 				.append("rect")
-				.attr("class","strong")
-				.attr("x","0px")
-				.attr("y", function(d){
-					return -1.8125;
+				.attr("class", "strong")
+				.attr("x", "0px")
+				.attr("y", function(d) {
+					return 0;
 				})
 				.attr("width", "300px")
-				.attr("height",  function(d){
-					return 19.8125;
+				.attr("height", function(d) {
+					return 19;
 				})
-				.style("fill","#9900FF")
+				.style("fill", "#9900FF")
 				.style("fill-opacity", 0.2);
+			// flow.append("line")
+			// 	.attr("x1", function(d){
+			// 		return 0;
+			// 	})
+			// 	.attr("x2", function(d){
+			// 		return width;
+			// 	})
+			// 	.attr("y1", 100)
+			// 	.attr("y2", 100)
+			// 	.style("stroke-width", 0.4)
+			// 	.style("stroke","#60afe9")
 
 
 			flow.append("path")
@@ -513,12 +634,12 @@ function render_topic(q, start, end) {
 				.gravity(.05)
 				.size([])
 
-			var channels=[]
-			for(var i=0; i<20; i++){
+			var channels = []
+			for (var i = 0; i < 40; i++) {
 				channels[i] = [];
 			}
 			var people_flow = flow.append("g").selectAll(".people")
-				.data(data.first.sort(function(a,b){
+				.data(data.first.sort(function(a, b) {
 					return a.y - b.y
 				}))
 				.enter()
@@ -526,25 +647,25 @@ function render_topic(q, start, end) {
 				.attr("class", "people")
 				.attr("transform", function(d, i) {
 					var c = 0
-					for(var i = 0; i < 20; i++){
-						if(channels[i].length > 0){
-							if(d.y - d3.max(channels[i]) < 4){
+					for (var i = 0; i < 40; i++) {
+						if (channels[i].length > 0) {
+							if (d.y - d3.max(channels[i]) < 4) {
 								continue;
 							}
 						}
 						channels[i].push(d.y);
 						break;
 					}
-					if(i%2 == 0){
-						return "translate(" + [x(d.y), 200 -i/2 * 20] + ")rotate(" + 0 + ")";
-					}else{
-						return "translate(" + [x(d.y), 200 +(i+1)/2 * 20] + ")rotate(" + 0 + ")";
+					if (i % 2 == 0) {
+						return "translate(" + [x(d.y), 200 - i / 2 * 12] + ")rotate(" + 0 + ")";
+					} else {
+						return "translate(" + [x(d.y), 200 + (i + 1) / 2 * 12] + ")rotate(" + 0 + ")";
 					}
-					
+
 				});
 			people_flow.append("text")
 				.attr("text-anchor", "end")
-				.style("font-size", 12)
+				.style("font-size", 10)
 				.attr("dy", ".85em")
 				.attr("transform", function(d) {
 					return "translate(" + [-6, -6] + ")rotate(" + 0 + ")";
@@ -555,7 +676,7 @@ function render_topic(q, start, end) {
 			people_flow.append("circle")
 				.attr("cx", 0)
 				.attr("cy", 0)
-				.attr("r", 6)
+				.attr("r", 5)
 				.style("stroke-width", 1)
 				.style("stroke", function(d) {
 					return "#eee";
@@ -564,10 +685,92 @@ function render_topic(q, start, end) {
 				.style("fill", function(d) {
 					return "orangered";
 				})
+			// people_flow.append("line")
+			// 	.attr("x1", 0)
+			// 	.attr("x2", 0)
+			// 	.attr("y1", 0)
+			// 	.attr("y2", function(d){
+			// 		return 200 - d.offset * 20;
+			// 	})
+			// 	.style("stroke-width", 1)
+			// 	.style("stroke", function(d) {
+			// 		return "#60afe9";
+			// 	})
+			// 	.style("fill", function(d) {
+			// 		return "#60afe9";
+			// 	})
 		}
 
 		draw_flow(terms[q]);
 
+
+		// 	.selectAll(".bunch")
+		// 	.data(energy.terms)
+		// 	.enter()
+		// 	.append("g")
+		// 	.attr("class", "bunch")
+		// 	.attr("transform", function(d) {
+		// 		index++;
+		// 		return "translate(" + [0, 20 * index] + ")rotate(" + 0 + ")";
+		// 	})
+
+		// var bunch = chart.append("g")
+		// 	.attr("transform", function(d) {
+		// 		return "translate(" + [0, 350] + ")rotate(" + 0 + ")";
+		// 	})
+		// 	.selectAll(".bunch")
+		// 	.data(energy.terms)
+		// 	.enter()
+		// 	.append("g")
+		// 	.attr("class", "bunch")
+		// 	.attr("transform", function(d) {
+		// 		index++;
+		// 		return "translate(" + [0, 20 * index] + ")rotate(" + 0 + ")";
+		// 	})
+
+		// bunch.append("rect").attr("x", function(d) {
+		// 	return x(d.start.year);
+		// }).attr("y", function(d) {
+		// 	return 0;
+		// }).attr("height", 18).attr("width", 1000)
+		// 	.style("fill-opacity", 0.5)
+		// 	.style("fill", "#60aFe9");
+
+		// bunch.append("text")
+		// 	.attr("text-anchor", "end")
+		// 	.attr("transform", function(d) {
+		// 		return "translate(" + [x(d.start.year), 0] + ")rotate(" + 0 + ")";
+		// 	})
+		// 	.style("font-size", 15)
+		// 	.attr("dy", ".85em")
+		// 	.text(function(d) {
+		// 		return d.t;
+		// 	})
+
+
+		// dots = bunch.selectAll("g.key_dot")
+		// 	.data(function(d) {
+		// 		return d.doc;
+		// 	});
+		// dots.enter()
+		// 	.append("circle").attr("class", "key_dot")
+		// 	.attr("cx", function(d) {
+		// 		return x(energy.documents[d].year) + 6;
+		// 	})
+		// 	.attr("cy", function(d) {
+		// 		return 9;
+		// 	})
+		// 	.attr("r", function(d) {
+		// 		return 6;
+		// 	})
+		// 	.style("stroke-width", 1)
+		// 	.style("stroke", function(d) {
+		// 		return "#eee";
+		// 	})
+		// 	.style("opacity", .1)
+		// 	.style("fill", function(d) {
+		// 		return "orangered";
+		// 	})
 
 		function dragmove(d) {
 			d3.select(this).attr("transform", "translate(" + d.x + "," + (d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))) + ")");

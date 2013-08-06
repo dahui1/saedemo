@@ -87,6 +87,14 @@ def build_term_document_matrix():
 def build_term_venue_matrix():
     pass
 
+def dump_keyword_given_document():
+    t = pickle.load(open("/home/yutao/data/knowledge-drift/terms_given_publication.pickle","rb"))
+    with open("/home/yutao/data/knowledge-drift/terms_given_publication.txt", "w") as f_out:
+        for key in t:
+            f_out.write("%s:%s"%(key, "\t".join([term.lower() for term in t[key].keys()])))
+
+
+
 if __name__ == "__main__":
     term_dict = get_term_freq()
     sorted_term_freq = sorted(term_dict.items(), key=lambda x:x[1], reverse=True)

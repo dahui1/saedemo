@@ -59,7 +59,7 @@ class KnowledgeDrift(object):
         self.end_time = None
         #cluster info
         self.num_local_clusters = 3
-        self.num_global_clusters = 3
+        self.num_global_clusters = 2
         self.local_clusters = None
         self.local_cluster_labels = None
         self.global_clusters = None
@@ -139,7 +139,7 @@ class KnowledgeDrift(object):
             publication_year = p.stat[0].value
             if publication_year >= start_time and publication_year <= end_time:
                 self.set_time(publication_year)
-                text += (p.title.lower() + " . " )#+ p.description.lower() +" . ")
+                text += (p.title.lower() + " . " + p.description.lower() +" . ")
                 #insert document
                 self.append_documents(p)
         return text
@@ -147,9 +147,10 @@ class KnowledgeDrift(object):
     def search_author(self, q, time_window, start_time, end_time):
         print q, time_window, start_time, end_time
         self.author_result = []
+        term_set = set()
         for qu in q:
             self.author_result.extend(client.author_search("academic", qu).entity)
-        term_set = set()
+            term_set.add(qu)
         index = 0
         for a in self.author_result:
             #insert author
@@ -157,9 +158,7 @@ class KnowledgeDrift(object):
             #search for document
             text = self.search_document_by_author(a, start_time=start_time, end_time=end_time)
             #extract terms
-            print text
             terms = term_extractor.extractTerms(text)
-            print terms
             for t in terms:
                 if t not in self.stop_words:
                     term_set.add(t)

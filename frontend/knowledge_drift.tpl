@@ -10,6 +10,10 @@
 <div id="bottom-box" ></div>
 
 <div id="right-box" style="overflow:auto; width:300px;">
+	<ul class="nav nav-tabs" id="nav" style="display:none">
+  	<li class="active" ><a href="#" id="first-three">Current Hotspot</a></li>
+  	<li><a href="#" id="revert">Overall</a></li>
+	</ul>
 </div>
 
 %rebase layout
