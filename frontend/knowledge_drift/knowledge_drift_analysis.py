@@ -1,7 +1,6 @@
 import sys
 sys.path.append("../")
 
-from dcclient import DataCenterClient
 from teclient import TermExtractorClient
 from saeclient import SAEClient
 
