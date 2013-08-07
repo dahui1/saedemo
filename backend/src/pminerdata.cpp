@@ -1,6 +1,6 @@
 #include <atomic>
 #include "glog/logging.h"
-#include "aminerdata.hpp"
+#include "pminerdata.hpp"
 #include "thread_util.hpp"
 #include "indexing/analyzer.hpp"
 
@@ -8,24 +8,20 @@ using namespace std;
 using namespace sae::io;
 using namespace indexing;
 
-AMinerData::AMinerData(char const * prefix) {
-    LOG(INFO) << "loading aminer graph...";
+PMinerData::PMinerData(char const * prefix) {
+    LOG(INFO) << "loading pminer graph...";
     g.reset(MappedGraph::Open(prefix));
-    int publication_type = g->VertexTypeIdOf("Publication");
+    int patent_type = g->VertexTypeIdOf("Patent");
     LOG(INFO) << "calculating average length...";
     auto calc_avg_len = [&]() {
         double avgLen = 0;
         int count = 0;
         for (auto ai = g->Vertices(); ai->Alive(); ai->Next()) {
-            if (ai->TypeId() == publication_type) {
+            if (ai->TypeId() == patent_type) {
                 count++;
-                auto p = parse<Publication>(ai->Data());
+                auto p = parse<Patent>(ai->Data());
                 for (unsigned i = 0; i < p.title.length(); i++)
                     if (p.title[i] == ' ' && i != p.title.length()-1)
-                        avgLen++;
-                avgLen++;
-                for (unsigned i = 0; i < p.abstract.length(); i++)
-                    if (p.abstract[i] == ' ' && i != p.abstract.length()-1)
                         avgLen++;
                 avgLen++;
             }
@@ -33,14 +29,14 @@ AMinerData::AMinerData(char const * prefix) {
         LOG(INFO) << "count: " << count << ", avgLen: " << avgLen;
         return avgLen / count;
     };
-    double avgLen = 150; //calc_avg_len();
-
+    double avgLen = 7.55;
+    
     LOG(INFO) << "building index...";
     const int shards = thread::hardware_concurrency();
-    pub_index_shards.resize(shards);
-
-    auto offset = g->VerticesOfType("Publication")->GlobalId();
-    auto total = g->VertexCountOfType("Publication");
+    patent_index_shards.resize(shards);
+    
+    auto offset = g->VerticesOfType("Patent")->GlobalId();
+    auto total = g->VertexCountOfType("Patent");
     auto shard_size = total / shards;
     atomic<int> processed(0);
     auto index_builder = [&](int shard_id) {
@@ -49,11 +45,11 @@ AMinerData::AMinerData(char const * prefix) {
         auto end = offset + (shard_id + 1) * shard_size;
         LOG(INFO) << "shard " << shard_id << " processing range: " << start << " to " << end;
         for (auto i = start; i < end && ai->Alive(); ai->MoveTo(i)) {
-            if (ai->TypeId() == publication_type){
-                auto p = parse<Publication>(ai->Data());
-                string text = p.title + " " + p.abstract;
+            if (ai->TypeId() == patent_type){
+                auto p = parse<Patent>(ai->Data());
+                string text = p.title;
                 unique_ptr<TokenStream> stream(ArnetAnalyzer::tokenStream(text));
-                pub_index_shards[shard_id].addSingle(ai->GlobalId(), 0, stream, avgLen);
+                patent_index_shards[shard_id].addSingle(ai->GlobalId(), 0, stream, avgLen);
             }
             // counter
             i++;
@@ -65,18 +61,17 @@ AMinerData::AMinerData(char const * prefix) {
         LOG(INFO) << "[" << shard_id << "] finished!";
     };
     dispatch_thread_group(index_builder, shards);
-
     LOG(INFO) << "index built!";
 }
 
-AMinerData::~AMinerData() {
-    LOG(INFO) << "releasing aminer data...";
+PMinerData::~PMinerData() {
+    LOG(INFO) << "releasing pminer data...";
 }
 
-SearchResult AMinerData::search_publications(const string& query, int limit) const {
-    vector<SearchResult> results(pub_index_shards.size());
+SearchResult PMinerData::search_patents(const string& query, int limit) const {
+    vector<SearchResult> results(patent_index_shards.size());
     auto index_searcher = [&](int shard_id) {
-        Searcher basic_searcher(pub_index_shards[shard_id]);
+        Searcher basic_searcher(patent_index_shards[shard_id]);
         unique_ptr<TokenStream> stream(ArnetAnalyzer::tokenStream(query));
         auto result = basic_searcher.search(stream);
         std::sort(result.begin(), result.end());

@@ -5,8 +5,9 @@
 #include "indexing/search.hpp"
 #include "search.hpp"
 #include "interface.pb.h"
-#include "aminerdata.hpp"
 #include "expert_searcher.hpp"
+#include "group_searcher.hpp"
+#include "user_searcher.hpp"
 
 using namespace std;
 using namespace demoserver;
@@ -60,8 +61,8 @@ namespace {
     }
 }
 
-SearchService::SearchService(std::unique_ptr<AMinerData>&& data)
-    : aminer(std::move(data)) {
+SearchService::SearchService(std::unique_ptr<AMinerData>&& adata, std::unique_ptr<PMinerData>&& pdata, std::unique_ptr<WeiboData>&& wdata)
+    : aminer(std::move(adata)), pminer(std::move(pdata)), weibo(std::move(wdata)) {
 }
 
 bool SearchService::AuthorSearchById(const string& input, string& output) {
@@ -215,3 +216,132 @@ bool SearchService::InfluenceSearchByAuthor(const string& input, string& output)
 
     return response.SerializeToString(&output);
 }
+
+bool SearchService::PatentSearch(const string& input, string& output) {
+    EntitySearchRequest request;
+    request.ParseFromString(input);
+    string query = request.query();
+    
+    int offset, count;
+    if (request.has_offset())
+        offset = request.offset();
+    else
+        offset = 0;
+    if (request.has_count())
+        count = request.count();
+    else
+        count = 50;
+
+    auto result = pminer->search_patents(query);
+
+    if (result.size() > 5000)
+        result.resize(5000);
+    
+    EntitySearchResponse response;
+    response.set_total_count(result.size());
+    response.set_query(query);
+    for (int ri = offset; ri < result.size() && ri - offset < count; ri++) {
+        auto i = result[ri];
+        DetailedEntity *de = response.add_entity();
+        auto p = pminer->get<Patent>(i.docId);
+        de->set_title(p.title);
+        de->set_id(i.docId);
+    }
+    return response.SerializeToString(&output);
+}
+
+bool SearchService::GroupSearch(const string& input, string& output) {
+    EntitySearchRequest request;
+    request.ParseFromString(input);
+    string query = request.query();
+    int offset, count;
+    if (request.has_offset())
+        offset = request.offset();
+    else
+        offset = 0;
+    if (request.has_count())
+        count = request.count();
+    else
+        count = 50;
+
+    auto result = GroupSearcher(*pminer).search(query);
+    EntitySearchResponse response;
+    response.set_total_count(result.size());
+    response.set_query(query);
+    for (int ri = offset; ri < result.size() && ri - offset < count; ri++) {
+        auto i = result[ri];
+        DetailedEntity *de = response.add_entity();
+        auto p = pminer->get<Group>(i.docId);
+        de->set_title(p.name);
+        de->set_id(i.docId);
+        char temp[10];
+        sprintf(temp, "%d", p.patCount);
+        string patCount = temp;
+        de->set_description(patCount);
+    }
+    return response.SerializeToString(&output);
+}
+
+bool SearchService::WeiboSearch(const string& input, string& output) {
+    EntitySearchRequest request;
+    request.ParseFromString(input);
+    string query = request.query();
+    int offset, count;
+    if (request.has_offset())
+        offset = request.offset();
+    else
+        offset = 0;
+    if (request.has_count())
+        count = request.count();
+    else
+        count = 50;
+    auto result = weibo->search_weibos(query);
+
+    if (result.size() > 5000)
+        result.resize(5000);
+    EntitySearchResponse response;
+    response.set_total_count(result.size());
+    response.set_query(query);
+    for (int ri = offset; ri < result.size() && ri - offset < count; ri++) {
+        auto i = result[ri];
+        DetailedEntity *de = response.add_entity();
+        auto p = weibo->get<Weibo>(i.docId);
+        de->set_title(p.text);
+        de->set_id(i.docId);
+        de->set_description(p.created_at);
+    }
+    return response.SerializeToString(&output);
+}
+
+
+bool SearchService::UserSearch(const string& input, string& output) {
+    EntitySearchRequest request;
+    request.ParseFromString(input);
+    string query = request.query();
+
+    int offset, count;
+    if (request.has_offset())
+        offset = request.offset();
+    else
+        offset = 0;
+    if (request.has_count())
+        count = request.count();
+    else
+        count = 50;
+	
+    auto result = UserSearcher(*weibo).search(query);
+    EntitySearchResponse response;
+    response.set_total_count(count);
+    response.set_query(query);
+    for (int ri = offset; ri < result.size() && ri - offset < count; ri++) {
+        auto i = result[ri];
+        DetailedEntity *de = response.add_entity();
+        auto p = weibo->get<User>(i.docId);
+        de->set_title(p.name);
+        de->set_id(i.docId);
+        de->set_description(p.description);
+        de->set_imgurl(p.profile_image_url);
+    }
+    return response.SerializeToString(&output);
+}
+
