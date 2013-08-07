@@ -26,6 +26,7 @@ struct Publication {
     string abstract;
     int jconf;
     int citation_number;
+    vector<string> topics;
 };
 
 struct JConf {
@@ -73,14 +74,14 @@ namespace sae {
             template <>
             struct serialize_impl<sae::serialization::OSerializeStream, Publication> {
                 static void run(sae::serialization::OSerializeStream& ostr, Publication& p) {
-                    ostr << p.id << p.pubkey << p.year << p.title << p.abstract << p.jconf << p.citation_number;
+                    ostr << p.id << p.pubkey << p.year << p.title << p.abstract << p.jconf << p.citation_number << p.topics;
                 }
             };
 
             template <>
             struct deserialize_impl<sae::serialization::ISerializeStream, Publication> {
                 static void run(sae::serialization::ISerializeStream& istr, Publication& p) {
-                    istr >> p.id >> p.pubkey >> p.year >> p.title >> p.abstract >> p.jconf >> p.citation_number;
+                    istr >> p.id >> p.pubkey >> p.year >> p.title >> p.abstract >> p.jconf >> p.citation_number >> p.topics;
                 }
             };
         }

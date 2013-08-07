@@ -46,6 +46,7 @@ namespace {
     void fill_entity_by_publication(DetailedEntity* de, const Publication& pub) {
         de->set_title(pub.title);
         de->set_description(pub.abstract);
+        de->set_topics(join(",", pub.topics));
         auto stat = de->add_stat();
         stat->set_type("year");
         stat->set_value(pub.year);
