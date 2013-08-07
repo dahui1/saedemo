@@ -59,15 +59,7 @@ class SAEClient(object):
         return self._entity_search("AuthorSearch", query, offset, count)
 
     def pub_search_by_author(self, dataset, author_id, offset=0, count=20):
-        r = interface_pb2.EntitySearchRequest()
-        r.dataset = dataset
-        r.query = str(author_id)
-        r.offset = offset
-        r.count = count
-        response = pbrequest(self.endpoint, "PubSearchByAuthor", r)
-        er = interface_pb2.EntitySearchResponse()
-        er.ParseFromString(response)
-        return er
+        return self._entity_search("PubSearchByAuthor", str(author_id), offset, count)
 
     def pub_search(self, dataset, query, offset=0, count=20):
         return self._entity_search("PubSearch", query, offset, count)
@@ -87,8 +79,27 @@ class SAEClient(object):
     def patent_search(self, dataset, query, offset=0, count=20):
         return self._entity_search("PatentSearch", query, offset, count)
 
+    def patent_search_by_group(self, dataset, group_id, offset=0, count=20):
+        return self._entity_search("PatentSearchByGroup", str(group_id), offset, count)
+
+    def patent_search_by_inventor(self, dataset, inventor_id, offset=0, count=20):
+        return self._entity_search("PatentSearchByInventor", str(inventor_id), offset, count)
+
     def group_search(self, dataset, query, offset=0, count=20):
         return self._entity_search("GroupSearch", query, offset, count)
+
+    def inventor_search(self, dataset, query, offset=0, count=20):
+        return self._entity_search("InventorSearch", query, offset, count)
+
+    def influence_search_by_group(self, dataset, gid):
+        r = interface_pb2.EntitySearchRequest()
+        r.dataset = dataset
+        r.query = str(gid)
+        response = pbrequest(self.endpoint, "InfluenceSearchByGroup", r)
+        er = interface_pb2.InfluenceSearchResponse()
+        er.ParseFromString(response)
+        return er
+
 
     def user_search(self, dataset, query, offset=0, count=20):
         return self._entity_search("UserSearch", query, offset, count)

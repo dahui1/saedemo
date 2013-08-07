@@ -8,6 +8,7 @@ using namespace std;
 struct Patent {
     int id;
     string title;
+    int year;
 };
 
 struct Inventor {
@@ -28,6 +29,7 @@ struct Group {
     int id;
     string name;
     int patCount;
+    string imgurl;
 };
 
 struct PatentInventor {
@@ -42,20 +44,25 @@ struct PatentCompany {
 struct CompanyGroup {
 };
 
+struct GroupInfluence {
+    int topic;
+    double score;
+};
+
 namespace sae {
     namespace serialization {
         namespace custom_serialization_impl {
             template <>
             struct serialize_impl<sae::serialization::OSerializeStream, Patent> {
                 static void run(sae::serialization::OSerializeStream& ostr, Patent& p) {
-                    ostr << p.id << p.title;
+                    ostr << p.id << p.title << p.year;;
                 }
             };
 
             template <>
             struct deserialize_impl<sae::serialization::ISerializeStream, Patent> {
                 static void run(sae::serialization::ISerializeStream& istr, Patent& p) {
-                    istr >> p.id >> p.title;
+                    istr >> p.id >> p.title >> p.year;
                 }
             };
         }
@@ -108,14 +115,14 @@ namespace sae {
             template <>
             struct serialize_impl<sae::serialization::OSerializeStream, Group> {
                 static void run(sae::serialization::OSerializeStream& ostr, Group& g) {
-                    ostr << g.id << g.name << g.patCount;
+                    ostr << g.id << g.name << g.patCount << g.imgurl;
                 }
             };
 
             template <>
             struct deserialize_impl<sae::serialization::ISerializeStream, Group> {
                 static void run(sae::serialization::ISerializeStream& istr, Group& g) {
-                    istr >> g.id >> g.name >> g.patCount;
+                    istr >> g.id >> g.name >> g.patCount >> g.imgurl;
                 }
             };
         }

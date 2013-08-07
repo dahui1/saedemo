@@ -24,24 +24,28 @@ void setup_services(RpcServer* server) {
     auto pminer = unique_ptr<PMinerData>(new PMinerData(FLAGS_pminer.c_str()));
     LOG(INFO) << "Loading weibo data...";
     auto weibo = unique_ptr<WeiboData>(new WeiboData(FLAGS_weibo.c_str()));
-	
+
     LOG(INFO) << "Making aminer, pminer and weibo services...";
     // Note that this object have to be allocated on heap
     auto service = new SearchService(std::move(aminer), std::move(pminer), std::move(weibo));
 
     LOG(INFO) << "Binding aminer and pminer services...";
     auto b = make_binder(*service);
-    
+
     //aminer services
     server->addMethod("PubSearch", b(&SearchService::PubSearch));
     server->addMethod("PubSearchByAuthor", b(&SearchService::PubSearchByAuthor));
     server->addMethod("AuthorSearch", b(&SearchService::AuthorSearch));
     server->addMethod("AuthorSearchById", b(&SearchService::AuthorSearchById));
     server->addMethod("InfluenceSearchByAuthor", b(&SearchService::InfluenceSearchByAuthor));
-    
+
     //pminer services
     server->addMethod("PatentSearch", b(&SearchService::PatentSearch));
+    server->addMethod("PatentSearchByGroup", b(&SearchService::PatentSearchByGroup));
+    server->addMethod("PatentSearchByInventor", b(&SearchService::PatentSearchByInventor));
     server->addMethod("GroupSearch", b(&SearchService::GroupSearch));
+    server->addMethod("InventorSearch", b(&SearchService::InventorSearch));
+    server->addMethod("InfluenceSearchByGroup", b(&SearchService::InfluenceSearchByGroup));
 
     //weibo services
     server->addMethod("UserSearch", b(&SearchService::UserSearch));

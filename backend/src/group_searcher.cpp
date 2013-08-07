@@ -42,7 +42,6 @@ SearchResult GroupSearcher::search(string query)
     auto enumer = pminer.search_patents(query, pat_count);
 
     LOG(INFO) << "Generating Group Pats... patents: " << enumer.size();
-    auto patent_type = g->EdgeTypeIdOf("Patent");
     for (auto& item : enumer) {
         auto vi = g->Vertices();
         vi->MoveTo(item.docId);
@@ -67,6 +66,66 @@ SearchResult GroupSearcher::search(string query)
     if (result.size() > 5000)
         result.resize(5000);
     
+    return result;
+}
+
+
+
+
+double get_score_inventor(const pair<int, vector<QueryItem>>& inventor_pats, const PMinerData& pminer)
+{
+    double score = 0.0;
+    for (const QueryItem& item : inventor_pats.second)
+    {
+        score += item.score;
+    }
+    return score;
+}
+
+InventorSearcher::InventorSearcher(const PMinerData& pminer, int max_pat_count)
+    :pminer(pminer), pat_count(max_pat_count)
+{
+}
+
+InventorSearcher::~InventorSearcher()
+{
+}
+
+SearchResult InventorSearcher::search(string query)
+{
+    auto g = pminer.g.get();
+    SearchResult result;
+    unordered_map<int, vector<QueryItem>> inventor_pats;
+
+    //searching section
+    LOG(INFO) << "Searching for query: " << query;
+    auto enumer = pminer.search_patents(query, pat_count);
+
+    LOG(INFO) << "Generating Inventor Pats... patents: " << enumer.size();
+    for (auto& item : enumer) {
+        auto vi = g->Vertices();
+        vi->MoveTo(item.docId);
+        for (auto edgeIt = vi->InEdges(); edgeIt->Alive(); edgeIt->Next()) {
+            if (edgeIt->TypeName() == "PatentInventor") {
+                int gid = edgeIt->SourceId();
+                inventor_pats[gid].push_back(item);
+            }
+        }
+    }
+
+    LOG(INFO) << "Scoring... inventors: " << inventor_pats.size();
+    //start caculation score
+    for (auto& gpats : inventor_pats) {
+        QueryItem item{gpats.first, get_score_inventor(gpats, pminer)};
+        if (item.score > 20 || result.size() <= 5000)
+            result.push_back(item);
+    }
+
+    LOG(INFO) << "Sorting...";
+    std::sort(result.begin(), result.end());
+    if (result.size() > 5000)
+        result.resize(5000);
+
     return result;
 }
 
