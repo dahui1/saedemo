@@ -1,5 +1,7 @@
 #include <string>
 #include "aminerdata.hpp"
+#include "pminerdata.hpp"
+#include "weibodata.hpp"
 
 struct SearchService {
     SearchService(std::unique_ptr<AMinerData>&& adata, std::unique_ptr<PMinerData>&& pdata, std::unique_ptr<WeiboData>&& wdata);

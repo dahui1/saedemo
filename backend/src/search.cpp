@@ -5,8 +5,9 @@
 #include "indexing/search.hpp"
 #include "search.hpp"
 #include "interface.pb.h"
-#include "aminerdata.hpp"
 #include "expert_searcher.hpp"
+#include "group_searcher.hpp"
+#include "user_searcher.hpp"
 
 using namespace std;
 using namespace demoserver;
