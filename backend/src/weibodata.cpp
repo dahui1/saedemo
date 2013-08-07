@@ -73,7 +73,6 @@ WeiboData::WeiboData(char const * prefix) {
                 sRst=(char *)malloc(nPaLen*6); 
                 int nRstLen=0;
                 nRstLen = ICTCLAS_ParagraphProcess(sentence,nPaLen,sRst,CODE_TYPE_UNKNOWN,0);
-                const set<string> stw = stopwords;
                 unique_ptr<TokenStream> stream(ArnetAnalyzer::tokenStream(sRst, stopwords));
                 weibo_index_shards[shard_id].addSingle(ai->GlobalId(), 0, stream, avgLen);
             }
@@ -97,10 +96,16 @@ SearchResult WeiboData::search_weibos(const string& query, int limit) const {
         SearchResult rs;
         return rs;
     }
+    unsigned int nPaLen=strlen(sentence); 
+    char* sRst=0; 
+    sRst=(char *)malloc(nPaLen*6); 
+    int nRstLen=0;
+    nRstLen = ICTCLAS_ParagraphProcess(sentence,nPaLen,sRst,CODE_TYPE_UNKNOWN,0);
     vector<SearchResult> results(weibo_index_shards.size());
     auto index_searcher = [&](int shard_id) {
         Searcher basic_searcher(weibo_index_shards[shard_id]);
-        unique_ptr<TokenStream> stream(ArnetAnalyzer::tokenStream(query, 1));
+		std::set<string> sw;
+        unique_ptr<TokenStream> stream(ArnetAnalyzer::tokenStream(sRst, sw));
         auto result = basic_searcher.search(stream);
         std::sort(result.begin(), result.end());
         results[shard_id] = move(result);
