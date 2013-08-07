@@ -10,7 +10,7 @@
 		<legend>Entity Search</legend>
 		<input type="text" class="search-query" name="q" placeholder="type in a topic, e.g. data mining" value="{{query}}"/>
 		<button class="btn btn-primary" type="submit">Search</button>
-		<button class="btn btn-analysis">Topic Analysis</button>
+		<button class="btn btn-analysis">Knowledge Drifting</button>
 	</fieldset>
 </form>
 
