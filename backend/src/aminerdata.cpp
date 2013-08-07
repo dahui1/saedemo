@@ -2,6 +2,7 @@
 #include "glog/logging.h"
 #include "aminerdata.hpp"
 #include "thread_util.hpp"
+#include "indexing/analyzer.hpp"
 
 using namespace std;
 using namespace sae::io;
@@ -32,7 +33,7 @@ AMinerData::AMinerData(char const * prefix) {
         LOG(INFO) << "count: " << count << ", avgLen: " << avgLen;
         return avgLen / count;
     };
-    double avgLen = 100; //calc_avg_len();
+    double avgLen = 150; //calc_avg_len();
 
     LOG(INFO) << "building index...";
     const int shards = thread::hardware_concurrency();
@@ -51,7 +52,8 @@ AMinerData::AMinerData(char const * prefix) {
             if (ai->TypeId() == publication_type){
                 auto p = parse<Publication>(ai->Data());
                 string text = p.title + " " + p.abstract;
-                pub_index_shards[shard_id].addSingle(ai->GlobalId(), 0, text, avgLen);
+                unique_ptr<TokenStream> stream(ArnetAnalyzer::tokenStream(text));
+                pub_index_shards[shard_id].addSingle(ai->GlobalId(), 0, stream, avgLen);
             }
             // counter
             i++;
@@ -75,7 +77,8 @@ SearchResult AMinerData::search_publications(const string& query, int limit) con
     vector<SearchResult> results(pub_index_shards.size());
     auto index_searcher = [&](int shard_id) {
         Searcher basic_searcher(pub_index_shards[shard_id]);
-        auto result = basic_searcher.search(query);
+        unique_ptr<TokenStream> stream(ArnetAnalyzer::tokenStream(query));
+        auto result = basic_searcher.search(stream);
         std::sort(result.begin(), result.end());
         results[shard_id] = move(result);
     };
