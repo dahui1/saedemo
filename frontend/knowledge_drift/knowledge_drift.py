@@ -93,7 +93,12 @@ def dump_keyword_given_document():
         for key in t:
             f_out.write("%s:%s"%(key, "\t".join([term.lower() for term in t[key].keys()])))
 
-
+def dump_keyword_given_document():
+    t = pickle.load(open("/home/yutao/data/knowledge-drift/terms_given_publication.pickle","rb"))
+    t = sorted(t.items(), key=lambda x: int(x[0]))
+    with open("/home/yutao/data/knowledge-drift/terms_given_publication.txt", "w") as f_out:
+        for key in t:
+            f_out.write("%s\t%s\n"%(key[0], "\t".join([term.lower() for term in key[1].keys()])))
 
 if __name__ == "__main__":
     term_dict = get_term_freq()

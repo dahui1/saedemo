@@ -85,11 +85,7 @@ class KnowledgeDrift(object):
         self.num_terms = 0
         print q, time_window, start_time, end_time
         if q == "big data":
-            q = [q, "large scale data mining", "cloud computing"]
-        elif q == "machine learning":
-            q = [q, "deep learning"]
-        elif q == "information network":
-            q = ["heterogenous information network"]
+            q = [q, "large scale data mining"]
         else:
             q = [q]
         self.search_author(q, time_window=time_window, start_time=start_time, end_time=end_time)
@@ -138,7 +134,6 @@ class KnowledgeDrift(object):
         logging.info("found %s documents" % len(result.entity))
         #text for extract key terms
         text = ""
-        term_set = set()
         for p in result.entity:
             #update time info
             publication_year = p.stat[0].value
@@ -147,36 +142,28 @@ class KnowledgeDrift(object):
                 text += (p.title.lower() + " . " + p.description.lower() +" . ")
                 #insert document
                 self.append_documents(p)
-                x = p.topics.split(",")
-                #print x
-                if len(x) > 0:
-                    for t in x:
-                        if len(t) > 1:
-                            term_set.add(t)
-        return term_set
+        return text
 
     def search_author(self, q, time_window, start_time, end_time):
         print q, time_window, start_time, end_time
         self.author_result = []
-        term_set = defaultdict(int)
+        term_set = set()
         for qu in q:
-            self.author_result.extend(client.author_search("academic", qu, 0, 50).entity)
+            self.author_result.extend(client.author_search("academic", qu, 0, 100).entity)
             print len(self.author_result)
-            term_set[qu] = 1000
+            term_set.add(qu)
         index = 0
         for a in self.author_result:
             #insert author
             self.append_authors(a)
             #search for document
-            ts = self.search_document_by_author(a, start_time=start_time, end_time=end_time)
-            #term_set.union(t)
+            text = self.search_document_by_author(a, start_time=start_time, end_time=end_time)
             #extract terms
-            # terms = term_extractor.extractTerms(text)
-            for t in ts:
+            terms = term_extractor.extractTerms(text)
+            for t in terms:
                 if t not in self.stop_words:
-                    term_set[t] += 1
-        sorted_term_set = sorted(term_set.keys(), key=lambda x:term_set[x], reverse=True)
-        self.set_terms(sorted_term_set[:100])
+                    term_set.add(t)
+        self.set_terms(term_set)
         #caculate term frequence
         self.caculate_term_frequence_given_document()
         #update time slides
@@ -428,7 +415,6 @@ class KnowledgeDrift(object):
                 self.global_cluster_labels[time][i] = l
 
     def build_graph(self):
-        logging.info("building graph")
         self.graph = {"nodes":[], "links":[], "terms":[], "people":[], "documents":[]}
         global_clusters_index = {}
         index = 0

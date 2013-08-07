@@ -72,8 +72,6 @@ var hist_height = 100;
 // document.getElementById("topic-trend-search-text").value ="deep learning";
 // document.getElementById("topic-trend-search-threshold").value =0.0001;
 
-
-
 function render_topic(q, start, end) {
 	chart.remove();
 	chart = d3.select("#chart").append("svg").attr("width", width) //width + margin.left + margin.right)
@@ -514,7 +512,7 @@ function render_topic(q, start, end) {
 				.size([])
 
 			var channels=[]
-			for(var i=0; i<20; i++){
+			for(var i=0; i<40; i++){
 				channels[i] = [];
 			}
 			var people_flow = flow.append("g").selectAll(".people")
@@ -526,7 +524,7 @@ function render_topic(q, start, end) {
 				.attr("class", "people")
 				.attr("transform", function(d, i) {
 					var c = 0
-					for(var i = 0; i < 20; i++){
+					for(var i = 0; i < 40; i++){
 						if(channels[i].length > 0){
 							if(d.y - d3.max(channels[i]) < 4){
 								continue;
@@ -536,18 +534,18 @@ function render_topic(q, start, end) {
 						break;
 					}
 					if(i%2 == 0){
-						return "translate(" + [x(d.y), 200 -i/2 * 20] + ")rotate(" + 0 + ")";
+						return "translate(" + [x(d.y), 200 -i/2 * 12] + ")rotate(" + 0 + ")";
 					}else{
-						return "translate(" + [x(d.y), 200 +(i+1)/2 * 20] + ")rotate(" + 0 + ")";
+						return "translate(" + [x(d.y), 200 +(i+1)/2 * 12] + ")rotate(" + 0 + ")";
 					}
 					
 				});
 			people_flow.append("text")
 				.attr("text-anchor", "end")
-				.style("font-size", 12)
+				.style("font-size", 10)
 				.attr("dy", ".85em")
 				.attr("transform", function(d) {
-					return "translate(" + [-6, -6] + ")rotate(" + 0 + ")";
+					return "translate(" + [-5, -5] + ")rotate(" + 0 + ")";
 				})
 				.text(function(d) {
 					return people[d.p].name;
@@ -555,7 +553,7 @@ function render_topic(q, start, end) {
 			people_flow.append("circle")
 				.attr("cx", 0)
 				.attr("cy", 0)
-				.attr("r", 6)
+				.attr("r", 5)
 				.style("stroke-width", 1)
 				.style("stroke", function(d) {
 					return "#eee";
