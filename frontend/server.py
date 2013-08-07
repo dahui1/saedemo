@@ -25,13 +25,13 @@ def search(dataset):
     q = request.query.q or ''
     print 'searching', q, 'in academic'
     result = client.author_search(dataset, q, 0, 20)
-    print result
+    pub_result = client.pub_search(dataset, q, 0, 20)
 
     return dict(
         query=q,
         encoded_query=urlencode({"q": result.query}),
         count=result.total_count,
-        results_title=dataset,
+        results_title='Experts',
         results=[
             dict(
                 id=e.id,
@@ -46,6 +46,15 @@ def search(dataset):
             ) for e in result.entity
         ],
         extra_results_list=[
+            dict(
+                title="Publications",
+                items=[
+                    dict(
+                        text=pub.title,
+                        link="http://arnetminer.org/publication/-%s.html" % pub.original_id
+                    ) for pub in pub_result.entity
+                ]
+            ),
         ]
     )
 

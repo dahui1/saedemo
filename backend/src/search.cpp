@@ -44,6 +44,7 @@ namespace {
     }
 
     void fill_entity_by_publication(DetailedEntity* de, const Publication& pub) {
+        de->set_original_id(pub.id);
         de->set_title(pub.title);
         de->set_description(pub.abstract);
         de->set_topics(join(",", pub.topics));
