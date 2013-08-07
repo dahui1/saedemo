@@ -10,6 +10,9 @@
     <title></title>
     <link rel="stylesheet" type="text/css" href="/static/bootstrap/css/bootstrap.css" media="all" />
     <link rel="stylesheet" type="text/css" href="/static/bootstrap/css/bootstrap-responsive.css" media="all" />
+    %for script in scripts:
+    <script src="{{script}}"></script>
+    %end
 </head>
 <body>
     <div class="navbar">
@@ -25,8 +28,6 @@
     <div class="container">
         %include
     </div>
-%for script in scripts:
-	<script src="{{script}}"></script>
-%end
+
 </body>
 </html>

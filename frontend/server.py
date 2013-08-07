@@ -1,13 +1,18 @@
 #!env python2
 
+import sys
 import os.path
 from bottle import route, run, template, view, static_file, request, urlencode
 from saeclient import SAEClient
+import logging
 
 import sample_data
+from knowledge_drift import KnowledgeDrift
 
-client = SAEClient("tcp://127.0.0.1:40112")
-
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+client = SAEClient("tcp://127.0.0.1:40114")
+knowledge_drift_client = KnowledgeDrift()
+logging.info("done")
 
 @route('/')
 def index():
@@ -31,25 +36,16 @@ def search(dataset):
             dict(
                 id=e.id,
                 name=e.title,
-                url="link:entity/%s" % e.id,
+                url="http://arnetminer.org/person/-%s.html" % e.original_id,
                 description=e.description,
                 stats=dict(
                     (s.type, s.value) for s in e.stat
                 ),
                 topics=e.topics.split(','),
                 imgurl=e.imgurl
-            ) for e in result.entities
+            ) for e in result.entity
         ],
         extra_results_list=[
-            {
-                "title": extra_list.title,
-                "items": [
-                    {
-                        "title": item.title,
-                        "link": "link:%s/%s" % (extra_list.title, item.id)
-                    } for item in extra_list.item
-                ]
-            } for extra_list in result.extra_list
         ]
     )
 
@@ -81,7 +77,7 @@ def search():
 
 
 @route('/<data>/topictrends')
-@view('topictrends')
+@view('knowledge_drift')
 def search(data):
     q = request.query.q or ''
     print 'rendering trends for', q, 'on', data
@@ -89,6 +85,20 @@ def search(data):
         query=q
     )
 
+@route('/<data>/terms')
+def search(data):
+    q = request.query.q or ''
+    start = int(request.query.start) or 0
+    end = int(request.query.end) or 10000
+    print 'rendering terms for', q, 'on', data, 'between', start, "and", end
+    return knowledge_drift_client.query_terms(q, start_time=start, end_time=end)
+
+@route('/<data>/render')
+def topic_trends(data):
+    q = request.query.q or ''
+    threshold = request.query.threshold or ''
+    print 'rendering trends for', q, threshold, 'on', data
+    return knowledge_drift_client.query_topic_trends(q, float(threshold))
 
 @route('/<data>/<uid:int>/influence/trends.tsv')
 def influence_trends(data, uid):
@@ -113,4 +123,9 @@ def static(path):
     curdir = os.path.dirname(os.path.realpath(__file__))
     return static_file(path, root=curdir + '/static/')
 
-run(server='auto', host='0.0.0.0', port=8083, reloader=True, debug=True)
+if len(sys.argv) > 1:
+    port = int(sys.argv[1])
+else:
+    port = 8082
+
+run(server='auto', host='0.0.0.0', port=port, reloader=True, debug=True)
