@@ -9,6 +9,7 @@ struct Patent {
     int id;
     string title;
     int year;
+	vector<string> inventors;
 };
 
 struct Inventor {
