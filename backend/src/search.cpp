@@ -523,3 +523,33 @@ bool SearchService::UserSearch(const string& input, string& output) {
     return response.SerializeToString(&output);
 }
 
+bool SearchService::InfluenceSearchByUser(const string& input, string& output) {
+    EntitySearchRequest request;
+    request.ParseFromString(input);
+
+    InfluenceSearchResponse response;
+
+    auto uid = stoi(request.query());
+    response.set_entity_id(uid);
+
+    auto vit = weibo->g->Vertices();
+    vit->MoveTo(uid);
+    for (auto eit = vit->OutEdges(); eit->Alive(); eit->Next()) {
+        if (eit->TypeName() == "UserInfluence") {
+            auto ui = parse<UserInfluence>(eit->Data());
+            Influence *inf = response.add_influence();
+            inf->set_id(eit->TargetId());
+            inf->set_score(ui.score);
+        }
+    }
+    for (auto eit = vit->InEdges(); eit->Alive(); eit->Next()) {
+        if (eit->TypeName() == "UserInfluence") {
+            auto ui = parse<UserInfluence>(eit->Data());
+            Influence *inf = response.add_influenced_by();
+            inf->set_id(eit->SourceId());
+            inf->set_score(ui.score);
+        }
+    }
+
+    return response.SerializeToString(&output);
+}
