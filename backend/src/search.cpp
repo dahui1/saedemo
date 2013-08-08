@@ -511,7 +511,8 @@ bool SearchService::UserSearch(const string& input, string& output) {
         auto stat = de->add_stat();
         stat->set_type("Followers");
         stat->set_value(p.followers_count);
-        de->set_original_id(stoi(p.id));
+        // p.id is too long for int
+        de->set_url(p.id);
     }
     return response.SerializeToString(&output);
 }

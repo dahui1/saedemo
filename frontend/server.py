@@ -15,7 +15,7 @@ import time
 import json
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-client = SAEClient("tcp://127.0.0.1:40114")
+client = SAEClient("tcp://127.0.0.1:40115")
 knowledge_drift_client = KnowledgeDrift()
 
 ask_influ=influence_analysis.asker(client)
@@ -42,7 +42,7 @@ def search():
 
     return dict(
         query=q,
-        encoded_query=urlencode({"q": result.query}),
+        encoded_query=urlencode({"q": result.query.encode('utf8')}),
         count=result.total_count,
         results_title='Experts',
         results=[
@@ -83,7 +83,7 @@ def search():
 
     return dict(
         query=q,
-        encoded_query=urlencode({"q": result.query}),
+        encoded_query=urlencode({"q": result.query.encode('utf8')}),
         count=result.total_count,
         results_title='Companies',
         results=[
@@ -118,14 +118,14 @@ def search():
 def search():
     q = request.query.q or ''
     print 'searching', q, 'in weibo'
-    result = client.weibo_search("", q, 0, 20)
-    pub_result = client.user_search("", q, 0, 20)
+    result = client.user_search("", q, 0, 20)
+    pub_result = client.weibo_search("", q, 0, 20)
 
     return dict(
         query=q,
-        encoded_query=urlencode({"q": result.query}),
+        encoded_query=urlencode({"q": result.query.encode('utf8')}),
         count=result.total_count,
-        results_title='Weibo',
+        results_title='Users',
         results=[
             dict(
                 id=e.id,
@@ -141,7 +141,7 @@ def search():
         ],
         extra_results_list=[
             dict(
-                title="Users",
+                title="Weibo",
                 items=[
                     dict(
                         text=pub.title,
