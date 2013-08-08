@@ -12,7 +12,7 @@ struct ExpertSearcher : public SupportDocSearcher<AMinerData> {
     indexing::SearchResult search(std::string query, int limit = 5000) {
         auto g = data.g.get();
         indexing::SearchResult result;
-        unordered_map<int, std::vector<indexing::QueryItem>> author_pubs;
+        std::unordered_map<int, std::vector<indexing::QueryItem>> author_pubs;
         LOG(INFO) << "Searching for query: " << query;
         LOG(INFO) << "Checking if the query is a name..";
         //check if the query is a name

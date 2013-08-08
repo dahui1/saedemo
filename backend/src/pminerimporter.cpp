@@ -101,7 +101,7 @@ int main() {
             inventor_map[*it].push_back(id);
         }
 
-        Patent patent{id, title, year};
+        Patent patent{id, title, year, inventors};
         builder.AddVertex(PATENT_BASE + id, patent, "Patent");
     }
     patent_file.close();
