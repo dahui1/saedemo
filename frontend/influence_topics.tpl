@@ -27,13 +27,13 @@
             <p> Influenced by {{name}}:
             <ul>
             %for influencee in topic["influencees"]:
-                <li>{{influencee[0]}}  </li>
+                <li><a href="{{influencee[2]}}">{{influencee[0]}}</a>  </li>
             %end
             </ul>
             <p> Influencers:
             <ul>
             %for influencer in topic["influencers"]:
-                <li>{{influencer[0]}}  </li>
+                <li><a href="{{influencer[2]}}">{{influencer[0]}}</a>  </li>
             %end
             </ul>
 			</div>

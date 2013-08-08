@@ -24,19 +24,17 @@ function drawChart() {
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  d3.json("/da/3/influence/trends", function(error, data) {
+  d3.json("influence/trends", function(error, data) {
     data.forEach(function(d) {
 	  d.year=d.date;
       d.date = parseDate(d.date);
       d.value = +d.value;
 	  d.pap1=d.pap1;
 	  d.au1=d.au1;
-	  //alert(d.au1);
 	  d.cit1=d.cit1;
 	  d.pap2=d.pap2;
 	  d.au2=d.au2;
 	  d.cit2=d.cit2;
-	  //alter(d.pap1);
     });
 
     x.domain(d3.extent(data, function(d) { return d.date; }));
@@ -94,8 +92,6 @@ function drawChart() {
 		.exit()
 			.transition()
 			.duration(1000)
-				// Leave the cx transition off. Allowing the points to fall where they lie is best.
-				//.attr('cx', function(d, i) { return xScale(i) })
 				.attr('cy', function() { return y(0) })
 				.style("opacity", 1e-6)
 				.remove();	
@@ -105,7 +101,6 @@ function drawChart() {
         html: true, 
         title: function() {
         var d = this.__data__;
-		//alert(data2);
 		  if (d.pap2!=0){
           return '<span class="title">' + d.pap1 +'<br></span><span class="author">'+d.au1 + ' </span><br>'+d.year+'<span class="cita">CitedBy: ' + d.cit1
 		  +'</span><br><span class="title"><br>' + d.pap2  +'<br></span><span class="author">'+d.au2 +'</span><br> '+d.year+'<span class="cita">CitedBy: ' 
@@ -126,12 +121,7 @@ function drawPie() {
       r = Math.min(w, h) / 2;
   color = d3.scale.category20c();
 
-  //data = [{"label":"data mining", "value":20}, 
-    //    {"label":"XML data", "value":50}, 
-      //   {"label":"Information Retrieval", "value":30}];
-  //var data; // a global
-
-d3.json("/da/3/influence/paper", function(error, json) {
+d3.json("influence/paper", function(error, json) {
   if (error) return console.warn(error);
   data = json;
   var vis = d3.select(container[0])
@@ -164,16 +154,14 @@ d3.json("/da/3/influence/paper", function(error, json) {
               return "translate(" + arc.centroid(d) + ")";
           })
           .attr("text-anchor", "middle")
-		  //.attr("style","overflow:hidden;display:block;width:px")
           .text(function(d, i) { return data[i].label; });
 });  
 };
 
 function drawTable() {
-d3.json("/da/3/influence/miserable", function(miserables) {
+d3.json("influence/miserable", function(miserables) {
   var index;
   for (index=0;index<5;index++){
-  //alert(index);
   
   var margin = {top: 120, right: 0, bottom: 10, left: 140},
     width = 300,
@@ -186,38 +174,33 @@ var x = d3.scale.ordinal().rangeBands([0, width]),
 var svg = d3.select(".topic-analysis.index" + index + " .table").append("svg")//".topic-analysis.index" + index + " .table"
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
-    //.style("margin-left", margin.left + "px")
-	//.style("float","left")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 	
   var matrix = [],
       nodes = miserables[index].nodes
-	  console.log(nodes)
       n = nodes.length;
 
   // Compute index per node.
   nodes.forEach(function(node, i) {
     node.index = i;
-    node.count = 0;
+   // node.count = 0;
     matrix[i] = d3.range(n).map(function(j) { return {x: j, y: i, z: 0}; });
   });
 
   // Convert links to matrix; count character occurrences.
   miserables[index].links.forEach(function(link) {
+    
     matrix[link.source][link.target].z += link.value;
-    //matrix[link.target][link.source].z += link.value;
-    //matrix[link.source][link.source].z += link.value;
-    //matrix[link.target][link.target].z += link.value;
-    nodes[link.source].count += link.value;
-    nodes[link.target].count += link.value;
+   // nodes[link.source].count += link.value;
+   // nodes[link.target].count += link.value;
   });
 
   // Precompute the orders.
   var orders = {
     name: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].name, nodes[b].name); }),
-    count: d3.range(n).sort(function(a, b) { return nodes[b].count - nodes[a].count; }),
-    group: d3.range(n).sort(function(a, b) { return nodes[b].group - nodes[a].group; })
+    //count: d3.range(n).sort(function(a, b) { return nodes[b].count - nodes[a].count; }),
+  //  group: d3.range(n).sort(function(a, b) { return nodes[b].group - nodes[a].group; })
   };
 
   // The default sort order.

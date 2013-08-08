@@ -6,9 +6,10 @@ from bottle import route, run, template, view, static_file, request, urlencode
 from saeclient import SAEClient
 import logging
 
-import network_integration
 from knowledge_drift import KnowledgeDrift
 import influence_analysis
+import influence_analysis_patent
+import sample_data
 import time
 import json
 
@@ -19,6 +20,9 @@ knowledge_drift_client = KnowledgeDrift()
 ask_influ=influence_analysis.asker(client)
 ask_tre=influence_analysis.asker_t(client)
 ask_table=influence_analysis.asker_table(client)
+ask_influ_p=influence_analysis_patent.asker_p(client)
+ask_tre_p=influence_analysis_patent.asker_t_p(client)
+ask_table_p=influence_analysis_patent.asker_table_p(client)
 
 logging.info("done")
 
@@ -50,8 +54,7 @@ def search():
                     (s.type, s.value) for s in e.stat
                 ),
                 topics=e.topics.split(','),
-                imgurl=e.imgurl,
-                integrated=network_integration.query(e.original_id)
+                imgurl=e.imgurl
             ) for e in result.entity
         ],
         extra_results_list=[
@@ -172,43 +175,62 @@ def topic_trends(data):
     print 'rendering trends for', q, threshold, 'on', data
     return knowledge_drift_client.query_topic_trends(q, float(threshold))
 
-@route('/<data>/<uid:int>/influence/trends')
-def influence_trends(data, uid):
+@route('/academic/<uid:int>/influence/trends')
+def influence_trends( uid):
     tmp_idd=int()
     tmp_idd=uid
     return json.dumps(ask_tre.ask(tmp_idd))
+
+@route('/patent/<uid:int>/influence/trends')
+def influence_trends_p( uid):
+    tmp_idd=int()
+    tmp_idd=uid
+    return json.dumps(ask_tre_p.ask(tmp_idd))
     
 
-@route('/<data>/<uid:int>/influence/miserable')
-def influence_table(data,uid):
-    #pass
+@route('/academic/<uid:int>/influence/miserable')
+def influence_table(uid):
     tmp_id=int()
     tmp_id=uid
     da=ask_table.ask(tmp_id)
     return json.dumps(da)
 
-@route('/<data>/<uid:int>/influence/paper')
-def influence_paper(data,uid):
-    #data = [{"label":"data mining", "value":20}, 
-     #     {"label":"XML data", "value":50}, 
-      #    {"label":"Information Retrieval", "value":30}];
+@route('/patent/<uid:int>/influence/miserable')
+def influence_table_p(uid):
+    tmp_id=int()
+    tmp_id=uid
+    da=ask_table_p.ask(tmp_id)
+    return json.dumps(da)
+
+@route('/academic/<uid:int>/influence/paper')
+def influence_paper(uid):
     tmp_id=int()
     tmp_id=uid
     return json.dumps(ask_influ.ask_pie(tmp_id))
-    #return json.dumps(data)
 
+@route('/patent/<uid:int>/influence/paper')
+def influence_paper(uid):
+    tmp_id=int()
+    tmp_id=uid
+    return json.dumps(ask_influ_p.ask_pie(tmp_id))
 
-@route('/<data>/<uid:int>/influence/topics/<date>')
+@route('/academic/<uid:int>/influence/topics/<date>')
 @view('influence_topics')
-def influence_topics(data, uid, date):
+def influence_topics( uid,date):
     tmp_id=int()
     tmp_id=uid
     return ask_influ.ask(tmp_id)
 
+@route('/patent/<uid:int>/influence/topics/<date>')
+@view('influence_topics')
+def influence_topics_p( uid,date):
+    tmp_id=int()
+    tmp_id=uid
+    return ask_influ_p.ask(tmp_id)
 
-@route('/<data>/<uid:int>/influence')
+@route('/academic/<uid:int>/influence')
 @view('influence')
-def influence(data, uid):
+def influence(uid):
     result=client.author_search_by_id("",[uid])
     influence_index=dict(
         name=result.entity[0].title,
@@ -216,6 +238,10 @@ def influence(data, uid):
 )
     return influence_index
 
+@route('/patent/<uid:int>/influence')
+@view('influence')
+def influence(uid):
+    return sample_data.influence_index
 
 @route('/static/<path:path>')
 def static(path):
