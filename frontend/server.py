@@ -16,7 +16,7 @@ import time
 import json
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-client = SAEClient("tcp://127.0.0.1:40115")
+client = SAEClient("tcp://127.0.0.1:40114")
 
 knowledge_drift_clients = {}
 def get_knowledge_drift_client(dataset):
@@ -62,7 +62,7 @@ def search():
                 stats=dict(
                     (s.type, s.value) for s in e.stat
                 ),
-                topics=e.topics.split(','),
+                topics=[t.title() for t in e.topics.split(',') if t.strip()],
                 imgurl=e.imgurl,
                 integrated=network_integration.query(e.original_id)
             ) for e in result.entity
