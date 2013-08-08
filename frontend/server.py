@@ -6,6 +6,7 @@ from bottle import route, run, template, view, static_file, request, urlencode
 from saeclient import SAEClient
 import logging
 
+import network_integration
 from knowledge_drift import KnowledgeDrift
 import influence_analysis
 import influence_analysis_patent
@@ -54,7 +55,8 @@ def search():
                     (s.type, s.value) for s in e.stat
                 ),
                 topics=e.topics.split(','),
-                imgurl=e.imgurl
+                imgurl=e.imgurl,
+                integrated=network_integration.query(e.original_id)
             ) for e in result.entity
         ],
         extra_results_list=[
