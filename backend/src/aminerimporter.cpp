@@ -128,14 +128,15 @@ int main() {
     {
         ifstream pubs("publication.txt");
         ifstream pub_ext("publication_ext.txt");
-        Publication p;
+        ifstream pub_topics("terms_given_publication.txt");
 
-        int tmp_id;
-        string tmp_abstract;
-        pub_ext >> tmp_id;
-        getline(pub_ext.ignore(), tmp_abstract);
+        int pid, tmp_id, tmp_pubtopic_id;
+        string tmp_abstract, tmp_topics;
+        tmp_id = tmp_pubtopic_id = -1;
 
-        while (pubs >> p.id) {
+        while (pubs >> pid) {
+            Publication p;
+            p.id = pid;
             if (p.id % 10000 == 0) {
                 cerr << "publication" << p.id << std::endl;
             }
@@ -161,10 +162,20 @@ int main() {
                     if (tmp_id >= p.id) break;
                 }
             }
+
+            if (p.id > tmp_pubtopic_id) {
+                while (pub_topics >> tmp_pubtopic_id) {
+                    getline(pub_topics.ignore(), tmp_topics);
+                    if (tmp_id >= p.id) break;
+                }
+            }
+
             if (p.id == tmp_id) {
                 p.abstract = tmp_abstract;
-                pub_ext >> tmp_id;
-                getline(pub_ext.ignore(), tmp_abstract);
+            }
+
+            if (p.id == tmp_pubtopic_id) {
+                p.topics = split(tmp_topics, '\t');
             }
 
             pid_map[p.id] = gvid++;

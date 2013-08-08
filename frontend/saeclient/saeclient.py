@@ -35,6 +35,17 @@ class SAEClient(object):
     def echo_test(self, s):
         return request(self.endpoint, "echo_test", s)
 
+    def _entity_search(self, method, query, offset, count):
+        r = interface_pb2.EntitySearchRequest()
+        r.dataset = ""
+        r.query = query
+        r.offset = offset
+        r.count = count
+        response = pbrequest(self.endpoint, method, r)
+        er = interface_pb2.EntitySearchResponse()
+        er.ParseFromString(response)
+        return er
+
     def author_search_by_id(self, dataset, aids):
         r = interface_pb2.EntityDetailRequest()
         r.dataset = dataset
@@ -45,49 +56,16 @@ class SAEClient(object):
         return er
 
     def author_search(self, dataset, query, offset=0, count=20):
-        r = interface_pb2.EntitySearchRequest()
-        r.dataset = dataset
-        r.query = query
-        r.offset = offset
-        r.count = count
-        response = pbrequest(self.endpoint, "AuthorSearch", r)
-        er = interface_pb2.EntitySearchResponse()
-        er.ParseFromString(response)
-        return er
+        return self._entity_search("AuthorSearch", query, offset, count)
 
     def pub_search_by_author(self, dataset, author_id, offset=0, count=20):
-        r = interface_pb2.EntitySearchRequest()
-        r.dataset = dataset
-        r.query = str(author_id)
-        r.offset = offset
-        r.count = count
-        response = pbrequest(self.endpoint, "PubSearchByAuthor", r)
-        er = interface_pb2.EntitySearchResponse()
-        er.ParseFromString(response)
-        return er
+        return self._entity_search("PubSearchByAuthor", str(author_id), offset, count)
 
     def pub_search(self, dataset, query, offset=0, count=20):
-        r = interface_pb2.EntitySearchRequest()
-        r.dataset = dataset
-        r.query = query
-        r.offset = offset
-        r.count = count
-        response = pbrequest(self.endpoint, "PubSearch", r)
-        er = interface_pb2.EntitySearchResponse()
-        er.ParseFromString(response)
-        return er
+        return self._entity_search("PubSearch", query, offset, count)
 
     def jconf_search(self, dataset, query, offset=0, count=20):
-        r = interface_pb2.EntitySearchRequest()
-        r.dataset = dataset
-        r.query = query
-        r.offset = offset
-        r.count = count
-        response = pbrequest(self.endpoint, "JConfSearch", r)
-        er = interface_pb2.EntitySearchResponse()
-        er.query = query
-        er.total_count = 0
-        return er
+        return self._entity_search("JConfSearch", query, offset, count)
 
     def influence_search_by_author(self, dataset, aid):
         r = interface_pb2.EntitySearchRequest()
@@ -98,6 +76,36 @@ class SAEClient(object):
         er.ParseFromString(response)
         return er
 
+    def patent_search(self, dataset, query, offset=0, count=20):
+        return self._entity_search("PatentSearch", query, offset, count)
+
+    def patent_search_by_group(self, dataset, group_id, offset=0, count=20):
+        return self._entity_search("PatentSearchByGroup", str(group_id), offset, count)
+
+    def patent_search_by_inventor(self, dataset, inventor_id, offset=0, count=20):
+        return self._entity_search("PatentSearchByInventor", str(inventor_id), offset, count)
+
+    def group_search(self, dataset, query, offset=0, count=20):
+        return self._entity_search("GroupSearch", query, offset, count)
+
+    def inventor_search(self, dataset, query, offset=0, count=20):
+        return self._entity_search("InventorSearch", query, offset, count)
+
+    def influence_search_by_group(self, dataset, gid):
+        r = interface_pb2.EntitySearchRequest()
+        r.dataset = dataset
+        r.query = str(gid)
+        response = pbrequest(self.endpoint, "InfluenceSearchByGroup", r)
+        er = interface_pb2.InfluenceSearchResponse()
+        er.ParseFromString(response)
+        return er
+
+
+    def user_search(self, dataset, query, offset=0, count=20):
+        return self._entity_search("UserSearch", query, offset, count)
+
+    def weibo_search(self, dataset, query, offset=0, count=20):
+        return self._entity_search("WeiboSearch", query, offset, count)
 
 def main():
     c = SAEClient("tcp://localhost:40112")

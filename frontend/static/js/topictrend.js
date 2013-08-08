@@ -57,6 +57,19 @@ d3.select("#topic-trend-search").on("click", function(e) {
 	render_topic($("#topic-trend-search-text").val(), 0, 10000); // parseInt($("#topic-trend-search-start").val()), parseInt($("#topic-trend-search-end").val()), parseInt($("#topic-trend-search-timewindow").val()));
 })
 
+$(document).ready(function() {
+	var get_query = function(name) {
+		name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+		var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+			results = regex.exec(location.search);
+		return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+	};
+	var query = get_query('q');
+	if (query.length > 0) {
+		render_topic(query, 0, 10000);
+	}
+});
+
 var timeline = d3.select("#right-box").append("svg");
 var bar_pos = 170;
 var timeline_item_offset = 20;
