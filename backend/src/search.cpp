@@ -231,7 +231,7 @@ bool SearchService::PatentSearchByGroup(const string& input, string& output) {
     for (auto eit = vit->InEdges(); eit->Alive(); eit->Next()) {
         if (eit->TypeName() == "PatentGroup") {
             auto vi = pminer->g->Vertices();
-            vi->MoveTo(eit->TargetId());
+            vi->MoveTo(eit->SourceId());
             auto pat = parse<Patent>(vi->Data());
             DetailedEntity *de = response.add_entity();
             de->set_id(eit->TargetId());
