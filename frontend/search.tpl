@@ -14,9 +14,12 @@
 	</fieldset>
 </form>
 
-<p>Hot queries:
-<span><a href="search?q=data%20mining">data mining</a></span>
-<span><a href="search?q=machine%20learning">machine learning</a></span>
+%if defined("hotqueries"):
+	<p>Hot queries:
+	%for query in hotqueries:
+	<span><a href="search?q={{query}}">{{query}}</a></span>
+	%end
+%end
 
 <div class="row-fluid">
 	<div class="results span8">

@@ -1,4 +1,5 @@
 #!env python2
+#encoding: utf8
 
 import sys
 import os.path
@@ -49,6 +50,7 @@ def search():
     return dict(
         query=q,
         encoded_query=urlencode({"q": result.query.encode('utf8')}),
+        hotqueries=["data mining", "machine learning"],
         count=result.total_count,
         results_title='Experts',
         results=[
@@ -90,6 +92,7 @@ def search():
     return dict(
         query=q,
         encoded_query=urlencode({"q": result.query.encode('utf8')}),
+        hotqueries=["data mining", "oil refine", "search engine"],
         count=result.total_count,
         results_title='Companies',
         results=[
@@ -130,6 +133,7 @@ def search():
     return dict(
         query=q,
         encoded_query=urlencode({"q": result.query.encode('utf8')}),
+        hotqueries=[u"苹果", u"地震"],
         count=result.total_count,
         results_title='Users',
         results=[
