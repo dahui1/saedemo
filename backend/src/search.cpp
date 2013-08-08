@@ -80,7 +80,7 @@ bool SearchService::AuthorSearchById(const string& input, string& output) {
             DetailedEntity *de = response.add_entity();
             de->set_id(aid);
             fill_entity_by_author(de, a);
-            query += to_string(aid);
+            query += to_string(aid) + "\t";
             count ++;
         }
     }
@@ -366,6 +366,35 @@ bool SearchService::GroupSearch(const string& input, string& output) {
     return response.SerializeToString(&output);
 }
 
+bool SearchService::GroupSearchById(const string& input, string& output) {
+    EntityDetailRequest request;
+    request.ParseFromString(input);
+
+    EntitySearchResponse response;
+    string query = "";
+    int count = 0;
+    auto vi = pminer->g->Vertices();
+    for (auto& gid : request.id()) {
+        vi->MoveTo(gid);
+        if (vi->TypeName() == "Group") {
+            DetailedEntity *de = response.add_entity();
+            auto p = parse<Group>(vi->Data());
+            de->set_id(gid);
+            de->set_title(p.name);
+            de->set_imgurl(p.imgurl);
+            auto stat = de->add_stat();
+            stat->set_type("Patents");
+            stat->set_value(p.patCount);
+            de->set_original_id(p.id);
+            query += to_string(gid) + "\t";
+            count ++;
+        }
+    }
+    response.set_query(query);
+    response.set_total_count(count);
+    return response.SerializeToString(&output);
+}
+
 bool SearchService::InventorSearch(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
@@ -489,7 +518,8 @@ bool SearchService::UserSearch(const string& input, string& output) {
         auto stat = de->add_stat();
         stat->set_type("Followers");
         stat->set_value(p.followers_count);
-        de->set_original_id(stoi(p.id));
+        // p.id is too long for int
+        de->set_url(p.id);
     }
     return response.SerializeToString(&output);
 }

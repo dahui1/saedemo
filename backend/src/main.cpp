@@ -44,6 +44,7 @@ void setup_services(RpcServer* server) {
     server->addMethod("PatentSearchByGroup", b(&SearchService::PatentSearchByGroup));
     server->addMethod("PatentSearchByInventor", b(&SearchService::PatentSearchByInventor));
     server->addMethod("GroupSearch", b(&SearchService::GroupSearch));
+    server->addMethod("GroupSearchById", b(&SearchService::GroupSearchById));
     server->addMethod("InventorSearch", b(&SearchService::InventorSearch));
     server->addMethod("InfluenceSearchByGroup", b(&SearchService::InfluenceSearchByGroup));
 

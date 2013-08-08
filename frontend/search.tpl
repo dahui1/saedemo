@@ -14,9 +14,12 @@
 	</fieldset>
 </form>
 
-<p>Hot queries:
-<span><a href="search?q=data%20mining">data mining</a></span>
-<span><a href="search?q=machine%20learning">machine learning</a></span>
+%if defined("hotqueries"):
+	<p>Hot queries:
+	%for query in hotqueries:
+	<span><a href="search?q={{query}}">{{query}}</a></span>
+	%end
+%end
 
 <div class="row-fluid">
 	<div class="results span8">
@@ -33,8 +36,10 @@
 			<div class="item-description span10">
 				<div class="item-name">
 					<a href="{{item['url']}}">{{item['name']}}</a>
-					%for k, v in item['integrated'].items():
-					<span>[<a href="{{v['url']}}">{{k}}</a>]</span>
+					%if 'integrated' in item:
+						%for k, v in item['integrated'].items():
+						<span>[<a href="{{v['url']}}">{{k}}</a>]</span>
+						%end
 					%end
 					<span class="pull-right">[<a href="{{item['id']}}/influence">Influence Analysis</a>]</span>
 				</div>
@@ -77,6 +82,11 @@
 		var query = $('.search-query', $(this).parent()).val();
 		window.location = "topictrends?q=" + encodeURIComponent(query);
 		return false;
+	});
+	$(document).ready(function() {
+		$('.result-item .item-img img').one('error', function() {
+			$(this).attr('src', 'http://static02.linkedin.com/scds/common/u/img/icon/icon_no_company_logo_100x60.png');
+		});
 	});
 </script>
 
