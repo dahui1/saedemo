@@ -110,12 +110,27 @@ class SAEClient(object):
     def user_search(self, dataset, query, offset=0, count=20):
         return self._entity_search("UserSearch", query, offset, count)
 
+    def user_search_by_id(self, dataset, uids):
+        return self._entity_detail_search("UserSearchById", uids)
+
     def weibo_search(self, dataset, query, offset=0, count=20):
         return self._entity_search("WeiboSearch", query, offset, count)
 
+    def weibo_search_by_user(self, dataset, user_id, offset=0, count=20):
+        return self._entity_search("WeiboSearchByUser", str(user_id), offset, count)
+
+    def influence_search_by_user(self, dataset, uid):
+        r = interface_pb2.EntitySearchRequest()
+        r.dataset = dataset
+        r.query = str(uid)
+        response = pbrequest(self.endpoint, "InfluenceSearchByUser", r)
+        er = interface_pb2.InfluenceSearchResponse()
+        er.ParseFromString(response)
+        return er 
+
 def main():
-    c = SAEClient("tcp://localhost:40112")
-    print c.author_search("academic", "data mining")
+    c = SAEClient("tcp://localhost:70112")
+    print c.user_search_by_id("",[21])
 
 
 if __name__ == "__main__":
