@@ -83,6 +83,11 @@
 		window.location = "topictrends?q=" + encodeURIComponent(query);
 		return false;
 	});
+	$(document).ready(function() {
+		$('.result-item .item-img img').one('error', function() {
+			$(this).attr('src', 'http://static02.linkedin.com/scds/common/u/img/icon/icon_no_company_logo_100x60.png');
+		});
+	});
 </script>
 
 %rebase layout

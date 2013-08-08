@@ -9,9 +9,9 @@
 using namespace std;
 
 #define GROUP_BASE 0
-#define PATENT_BASE 200000
-#define COMPANY_BASE 4500000
-#define INVENTOR_BASE 5000000
+#define PATENT_BASE 200000LL
+#define COMPANY_BASE 45000000LL
+#define INVENTOR_BASE 500000000LL
 
 vector<string> split(string s, char c) {
     int last = 0;
@@ -65,7 +65,7 @@ int main() {
         Company company{id, name, patCount, logo, homepage, terms, gcid};
         com2group[id] = gcid;
         if (logo.size() > 0 && group_logo[gcid].size() == 0) {
-            group_logo[gcid] == logo;
+            group_logo[gcid] = logo;
         }
         builder.AddVertex(COMPANY_BASE + id, company, "Company");
     }
