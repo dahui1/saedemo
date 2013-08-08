@@ -297,7 +297,6 @@ bool SearchService::PatentSearchByInventor(const string& input, string& output) 
     return response.SerializeToString(&output);
 }
 
-
 bool SearchService::PatentSearch(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
@@ -539,7 +538,7 @@ bool SearchService::InfluenceSearchByUser(const string& input, string& output) {
             auto ui = parse<UserInfluence>(eit->Data());
             Influence *inf = response.add_influence();
             inf->set_id(eit->TargetId());
-            inf->set_score(ui.score);
+            inf->set_score(ui.weight);
         }
     }
     for (auto eit = vit->InEdges(); eit->Alive(); eit->Next()) {
@@ -547,9 +546,75 @@ bool SearchService::InfluenceSearchByUser(const string& input, string& output) {
             auto ui = parse<UserInfluence>(eit->Data());
             Influence *inf = response.add_influenced_by();
             inf->set_id(eit->SourceId());
-            inf->set_score(ui.score);
+            inf->set_score(ui.weight);
         }
     }
 
+    return response.SerializeToString(&output);
+}
+
+
+bool SearchService::WeiboSearchByUser(const string& input, string& output) {
+    EntitySearchRequest request;
+    request.ParseFromString(input);
+
+    EntitySearchResponse response;
+    response.set_query(request.query());
+
+    auto uid = stoi(request.query());
+    auto vit = weibo->g->Vertices();
+    vit->MoveTo(uid);
+    int count = 0;
+    for (auto eit = vit->OutEdges(); eit->Alive(); eit->Next()) {
+        if (eit->TypeName() == "UserWeibo") {
+            auto vi = weibo->g->Vertices();
+            vi->MoveTo(eit->TargetId());
+            auto weibo = parse<Weibo>(vi->Data());
+            DetailedEntity *de = response.add_entity();
+            de->set_title(weibo.text);
+            de->set_id(eit->TargetId());
+            auto stat = de->add_stat();
+            stat->set_type("Reposts");
+            stat->set_value(weibo.reposts_count);
+            stat = de->add_stat();
+            stat->set_type("Comments");
+            stat->set_value(weibo.comments_count);
+            de->set_description(weibo.created_at);
+
+            count ++;
+        }
+    }
+    response.set_total_count(count);
+
+    return response.SerializeToString(&output);
+}
+
+bool SearchService::UserSearchById(const string& input, string& output) {
+    EntityDetailRequest request;
+    request.ParseFromString(input);
+
+    EntitySearchResponse response;
+    string query = "";
+    response.set_query(query);
+    
+    int count = 0;
+    auto vi = weibo->g->Vertices();
+    for (auto& uid : request.id()) {
+        vi->MoveTo(uid);
+        if (vi->TypeName() == "User") {
+            DetailedEntity *de = response.add_entity();
+            auto p = parse<User>(vi->Data());
+            de->set_id(uid);
+            de->set_title(p.name);
+            de->set_description(p.description);
+            de->set_imgurl(p.profile_image_url);
+            auto stat = de->add_stat();
+            stat->set_type("Followers");
+            stat->set_value(p.followers_count);
+            de->set_url(p.id);
+            count ++;
+        }
+    }
+    response.set_total_count(count);
     return response.SerializeToString(&output);
 }

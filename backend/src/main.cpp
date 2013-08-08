@@ -50,11 +50,13 @@ void setup_services(RpcServer* server) {
 
     //weibo services
     server->addMethod("UserSearch", b(&SearchService::UserSearch));
+    server->addMethod("UserSearchById", b(&SearchService::UserSearchById));
     server->addMethod("WeiboSearch", b(&SearchService::WeiboSearch));
+    server->addMethod("WeiboSearchByUser", b(&SearchService::WeiboSearchByUser));
+    server->addMethod("InfluenceSearchByUser", b(&SearchService::InfluenceSearchByUser));
 
     LOG(INFO) << "Services have been set up.";
 }
-
 
 int main(int argc, char** argv) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);

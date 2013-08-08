@@ -20,14 +20,17 @@ struct SearchService {
     bool GroupSearch(const std::string&, std::string&);
     bool GroupSearchById(const std::string&, std::string&);
     bool InventorSearch(const std::string&, std::string&);
-	bool InfluenceSearchByGroup(const string& input, string& output);
+    bool InfluenceSearchByGroup(const string& input, string& output);
 
     //weibo services
     bool WeiboSearch(const std::string&, std::string&);
     bool UserSearch(const std::string&, std::string&);
+    bool WeiboSearchByUser(const string& input, string& output);
+    bool InfluenceSearchByUser(const string& input, string& output);
+    bool UserSearchById(const string& input, string& output);
 
 private:
     std::unique_ptr<AMinerData> aminer;
     std::unique_ptr<PMinerData> pminer;
-	std::unique_ptr<WeiboData> weibo;
+    std::unique_ptr<WeiboData> weibo;
 };
