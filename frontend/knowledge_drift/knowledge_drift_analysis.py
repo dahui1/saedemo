@@ -21,7 +21,8 @@ term_extractor = TermExtractorClient()
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 class KnowledgeDrift(object):
-    def __init__(self):
+    def __init__(self, data_set="academic"):
+        self.data_set = data_set
         self.stop_words = ["data set", "training data", "experimental result", 
                            "difficult learning problem", "user query", "case study", 
                            "web page", "data source", "proposed algorithm", 
@@ -134,7 +135,10 @@ class KnowledgeDrift(object):
 
     def search_document_by_author(self, a, start_time=0, end_time=10000):
         logging.info("querying documents for %s from %s to %s" % (a.title, start_time, end_time))
-        result = client.pub_search_by_author("academic", a.id)
+        if self.data_set == "academic":
+            result = client.pub_search_by_author(self.data_set, a.id)
+        elif self.data_set == "patent":
+            result = client.pub_patent_by_inventor(self.data_set, a.id)
         logging.info("found %s documents" % len(result.entity))
         #text for extract key terms
         text = ""
