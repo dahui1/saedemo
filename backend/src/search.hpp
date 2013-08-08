@@ -18,6 +18,7 @@ struct SearchService {
     bool PatentSearchByInventor(const std::string&, std::string&);
     bool PatentSearchByGroup(const std::string&, std::string&);
     bool GroupSearch(const std::string&, std::string&);
+    bool GroupSearchById(const std::string&, std::string&);
     bool InventorSearch(const std::string&, std::string&);
 	bool InfluenceSearchByGroup(const string& input, string& output);
 
