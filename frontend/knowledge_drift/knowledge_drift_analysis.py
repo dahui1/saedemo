@@ -1,26 +1,24 @@
 import sys
 sys.path.append("../")
 
-from teclient import TermExtractorClient
 from saeclient import SAEClient
 
 from utils.algorithms import *
 from collections import defaultdict
 from bs4 import UnicodeDammit
 import numpy as np
-import json     
+import json
 import gensim
 import pickle
 import networkx as nx
 import logging
 from sklearn.cluster import Ward, KMeans, MiniBatchKMeans, spectral_clustering
 
-client = SAEClient("tcp://10.1.1.111:40114")
-term_extractor = TermExtractorClient()
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 class KnowledgeDrift(object):
-    def __init__(self):
+    def __init__(self, client):
+        self.client = client
         self.stop_words = ["data set", "training data", "experimental result", 
                            "difficult learning problem", "user query", "case study", 
                            "web page", "data source", "proposed algorithm", 
@@ -133,7 +131,7 @@ class KnowledgeDrift(object):
 
     def search_document_by_author(self, a, start_time=0, end_time=10000):
         logging.info("querying documents for %s from %s to %s" % (a.title, start_time, end_time))
-        result = client.pub_search_by_author("academic", a.id)
+        result = self.client.pub_search_by_author("academic", a.id)
         logging.info("found %s documents" % len(result.entity))
         #text for extract key terms
         text = ""
@@ -159,7 +157,7 @@ class KnowledgeDrift(object):
         self.author_result = []
         term_set = defaultdict(int)
         for qu in q:
-            self.author_result.extend(client.author_search("academic", qu, 0, 50).entity)
+            self.author_result.extend(self.client.author_search("academic", qu, 0, 50).entity)
             print len(self.author_result)
             term_set[qu] = 1000
         index = 0
@@ -556,8 +554,8 @@ class KnowledgeDrift(object):
 
 
 def main():
-    trend = TopicTrend()
-    trend.query_terms("deep learning")
+    trend = KnowledgeDrift(SAEClient("tcp://10.1.1.111:40115"))
+    trend.query_terms("deep learning", start_time=0, end_time=10000)
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ import json
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 client = SAEClient("tcp://127.0.0.1:40115")
-knowledge_drift_client = KnowledgeDrift()
+knowledge_drift_client = KnowledgeDrift(client)
 
 ask_influ=influence_analysis.asker(client)
 ask_tre=influence_analysis.asker_t(client)
