@@ -9,15 +9,16 @@ include_directories("${PROTOBUF_INCLUDE_DIRS}")
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
 file (GLOB server_SOURCES
-    "expert_searcher.*"
+    "support_doc_searcher.hpp"
     "aminer.hpp"
     "aminerdata.hpp"
-    "group_searcher.*"
+    "expert_searcher.hpp"
     "pminer.hpp"
     "pminerdata.hpp"
-    "user_searcher.*"
+    "group_searcher.hpp"
     "weibo.hpp"
     "weibodata.hpp"
+    "user_searcher.hpp"
     "search.*"
     "main.cpp"
 )

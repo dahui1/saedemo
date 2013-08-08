@@ -1,21 +1,45 @@
 #pragma once
 #include "aminerdata.hpp"
-#include "indexing/search.hpp"
+#include "support_doc_searcher.hpp"
 
-/*
-* We only provide document based expert search( search expert by search corresponding publications first)
-* This class provide interface for feature plugin, thus one could add possible features and their weight to this class.
-* each feature extractor could enumerate the candidate and return a score, a overall sum of feature score would be
-* used for ranking the expert
-*/
+struct ExpertSearcher : public SupportDocSearcher<AMinerData> {
+    ExpertSearcher(AMinerData& aminer) : SupportDocSearcher(aminer, "Publication", 5000) {
+    }
+    ~ExpertSearcher() {
+    }
 
-class ExpertSearcher
-{
-public:
-	ExpertSearcher(const AMinerData& aminer, int max_pub_count = 5000);
-	~ExpertSearcher();
-	indexing::SearchResult search(std::string query);
-private:
-	const AMinerData& aminer;
-	int pub_count;
+protected:
+    virtual std::vector<sae::io::vid_t> get_targets(indexing::QueryItem support) {
+        std::vector<sae::io::vid_t> targets;
+
+        auto& g = data.g;
+        auto vi = g->Vertices();
+        vi->MoveTo(support.docId);
+        auto publish_type = g->EdgeTypeIdOf("Publish");
+        for (auto edgeIt = vi->InEdges(); edgeIt->Alive(); edgeIt->Next()) {
+            if (edgeIt->TypeId() == publish_type) {
+                int aid = edgeIt->SourceId();
+                targets.push_back(aid);
+            }
+        }
+
+        return targets;
+    }
+
+    virtual double get_score(const std::pair<int, std::vector<indexing::QueryItem>>& author_pubs) {
+        auto author = data.get<Author>(author_pubs.first);
+        double score = 0.0;
+
+        for (const indexing::QueryItem& item : author_pubs.second)
+        {
+            auto pub = data.get<Publication>(item.docId);
+            int nCitations = pub.citation_number;
+            if (nCitations >= 1)
+                score += item.score * sqrt((double)nCitations) / 2.0;
+            else
+                score += item.score;
+        }
+
+        return score;
+    }
 };
