@@ -55,11 +55,8 @@ int main() {
         	vector<string> inputs = split(user_input, '\t');
         	User user;
 			if (inputs.size() != 37) continue;
-        	user.domain = inputs[1];
         	user.avatar_large = inputs[2];
         	user.bi_followers_count = convert_to_int(inputs[3]);
-        	user.block_word = convert_to_int(inputs[4]);
-        	user.star = convert_to_int(inputs[5]);
         	user.id = inputs[6];
         	user.followers_count = convert_to_int(inputs[11]);
         	user.profile_url = inputs[14];
