@@ -240,14 +240,6 @@ bool SearchService::PatentSearchByGroup(const string& input, string& output) {
             stat->set_type("year");
             stat->set_value(pat.year);
 
-            auto re = de->add_related_entity();
-            re->set_type("Inventor");
-            for (auto ei = vi->InEdges(); ei->Alive(); ei->Next()) {
-                if (ei->TypeName() == "PatentInventor") {
-                    re->add_id(ei->SourceId());
-                }
-            }
-
             count ++;
         }
     }
