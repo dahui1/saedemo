@@ -44,7 +44,7 @@ int main() {
     builder.AddEdgeDataType("UserWeibo");
     builder.AddEdgeDataType("UserInfluence");
 
-    cerr << "Loading userinfo.txt..." << endl;
+    cerr << "Loading userIDName.txt..." << endl;
     ifstream user_file("userIDName.txt");
     string user_input;
     int i = 0;
@@ -88,9 +88,10 @@ int main() {
         user.created_at = inputs[34];
         //user.verified_type = inputs[35];
         //user.following = convert_to_bool(inputs[36]);*/
+		if (inputs.size() != 3) continue;
         user.id = inputs[0];
         user.name = inputs[1];
-        user.followers_count = inputs[2];
+        user.followers_count = convert_to_int(inputs[2]);
         userid[user.id] = i;
         builder.AddVertex(USER_BASE + i++, user, "User");
     }
@@ -126,7 +127,7 @@ int main() {
     while (getline(user2user, influence)) {
         vector<string> inputs = split(influence, '\t');
         UserInfluence ui;
-        ui.weight = inputs[2];
+        ui.weight = convert_to_int(inputs[2]);
         builder.AddEdge(USER_BASE + userid[inputs[0]], USER_BASE + userid[inputs[1]], ui, "UserInfluence");
     }
     user2user.close();
