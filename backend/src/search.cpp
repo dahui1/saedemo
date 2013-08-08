@@ -239,7 +239,14 @@ bool SearchService::PatentSearchByGroup(const string& input, string& output) {
             auto stat = de->add_stat();
             stat->set_type("year");
             stat->set_value(pat.year);
-
+            if (pat.inventors.size() > 0) {
+                string inventors = pat.inventors[0];
+                cout << pat.inventors[0] << endl;
+                for (int i = 1; i < pat.inventors.size(); i++)
+                    inventors += ", " + pat.inventors[i];
+                cout << inventors << endl;
+                de->set_description(inventors);
+            }
             count ++;
         }
     }

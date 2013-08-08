@@ -48,9 +48,9 @@ namespace sae {
             struct serialize_impl<sae::serialization::OSerializeStream, User> {
                 static void run(sae::serialization::OSerializeStream& ostr, User& u) {
                     ostr << u.avatar_large << u.bi_followers_count << u.id << u.followers_count
-    					u.profile_url << u.statuses_count << u.description << u.friends_count
-						u.mbrank << u.profile_image_url << u.name << u.weihao << u.remark
-    					u.favourites_count << u.url << u.gender << u.created_at;
+                         << u.profile_url << u.statuses_count << u.description << u.friends_count
+                         << u.mbrank << u.profile_image_url << u.name << u.weihao << u.remark
+                         << u.favourites_count << u.url << u.gender << u.created_at;
                 }
             };
 
@@ -58,9 +58,9 @@ namespace sae {
             struct deserialize_impl<sae::serialization::ISerializeStream, User> {
                 static void run(sae::serialization::ISerializeStream& istr, User& u) {
                     istr >> u.avatar_large >> u.bi_followers_count >> u.id >> u.followers_count
-    					u.profile_url >> u.statuses_count >> u.description >> u.friends_count
-						u.mbrank >> u.profile_image_url >> u.name >> u.weihao >> u.remark
-    					u.favourites_count >> u.url >> u.gender >> u.created_at;
+                         >> u.profile_url >> u.statuses_count >> u.description >> u.friends_count
+                         >> u.mbrank >> u.profile_image_url >> u.name >> u.weihao >> u.remark
+                         >> u.favourites_count >> u.url >> u.gender >> u.created_at;
                 }
             };
         }

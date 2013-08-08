@@ -9,7 +9,7 @@ struct Patent {
     int id;
     string title;
     int year;
-	vector<string> inventors;
+    vector<string> inventors;
 };
 
 struct Inventor {
@@ -56,14 +56,14 @@ namespace sae {
             template <>
             struct serialize_impl<sae::serialization::OSerializeStream, Patent> {
                 static void run(sae::serialization::OSerializeStream& ostr, Patent& p) {
-                    ostr << p.id << p.title << p.year;;
+                    ostr << p.id << p.title << p.year << p.inventors;
                 }
             };
 
             template <>
             struct deserialize_impl<sae::serialization::ISerializeStream, Patent> {
                 static void run(sae::serialization::ISerializeStream& istr, Patent& p) {
-                    istr >> p.id >> p.title >> p.year;
+                    istr >> p.id >> p.title >> p.year >> p.inventors;
                 }
             };
         }
