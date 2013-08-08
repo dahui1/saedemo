@@ -151,6 +151,7 @@ def search():
 def search(data):
     q = request.query.q or ''
     print 'rendering trends for', q, 'on', data
+    knowledge_drift_client.data_set = data
     return dict(
         query=q
     )
@@ -223,6 +224,6 @@ def static(path):
 if len(sys.argv) > 1:
     port = int(sys.argv[1])
 else:
-    port = 8082
+    port = 8083
 
 run(server='auto', host='0.0.0.0', port=port, reloader=True, debug=True)
