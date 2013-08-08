@@ -33,6 +33,9 @@
 			<div class="item-description span10">
 				<div class="item-name">
 					<a href="{{item['url']}}">{{item['name']}}</a>
+					%for k, v in item['integrated'].items():
+					<span>[<a href="{{v['url']}}">{{k}}</a>]</span>
+					%end
 					<span class="pull-right">[<a href="{{item['id']}}/influence">Influence Analysis</a>]</span>
 				</div>
 				{{item['description']}}
