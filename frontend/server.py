@@ -130,7 +130,7 @@ def search():
             dict(
                 id=e.id,
                 name=e.title,
-                url="http://weibo.com/%s" % e.original_id,
+                url="http://weibo.com/u/%s" % e.url,
                 description=e.description,
                 stats=dict(
                     (s.type, s.value) for s in e.stat
