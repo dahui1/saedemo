@@ -244,7 +244,6 @@ bool SearchService::PatentSearchByGroup(const string& input, string& output) {
                 cout << pat.inventors[0] << endl;
                 for (int i = 1; i < pat.inventors.size(); i++)
                     inventors += ", " + pat.inventors[i];
-                cout << inventors << endl;
                 de->set_description(inventors);
             }
             count ++;

@@ -1,8 +1,41 @@
 <style type="text/css">
+	.result-item {
+		padding: 4px 2px 4px 6px;
+		border-bottom: 1px dashed #f6f6f6;
+	}
+
 	.item-img {
 		max-width: 120px;
-		padding: 10px;
+		padding: 2px;
+		border: 1px solid #ddd;
+		border-radius: 4px;
 	}
+
+	.item-img:hover {
+		border-color: #0088cc;
+	}
+
+	.item-stats {
+		color: green;
+		font-size: 12px;
+	}
+
+	ul.item-stats > li {
+		margin-left: 0;
+		padding-left: 0;
+	}
+
+	.item-description {
+		color: grey;
+		margin: 0;
+	}
+
+	.item-topics > li {
+		padding-left: 0;
+		font-size: 11px;
+		border: solid 1px rgba(99, 99, 99, 0.18);
+	}
+
 </style>
 
 <form class="search form-search" method="get">
@@ -33,7 +66,7 @@
 					<img src="{{item['imgurl']}}" alt="{{item['name']}}" style="width: 100%; height: auto;"/>
 				</a>
 			</div>
-			<div class="item-description span10">
+			<div class="item-content span10">
 				<div class="item-name">
 					<a href="{{item['url']}}">{{item['name']}}</a>
 					%if 'integrated' in item:
@@ -43,12 +76,12 @@
 					%end
 					<span class="pull-right">[<a href="{{item['id']}}/influence">Influence Analysis</a>]</span>
 				</div>
-				{{item['description']}}
 				<ul class="item-stats inline">
 				%for k, v in item['stats'].items():
-					<li>{{k}}: {{v}}</li>
+					<li>{{k}}: <b><i>{{v}}</i></b></li>
 				%end
 				</ul>
+				<p class='item-description'>{{item['description']}}</p>
 				<ul class="item-topics inline">
 				%for t in item['topics']:
 					<li>{{t}}</li>
