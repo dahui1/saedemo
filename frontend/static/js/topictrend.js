@@ -104,7 +104,7 @@ function render_topic(q, start, end) {
 	$("#chart").addClass("loading");
 
 	
-	d3.json("/academic/terms?q=" + q + "&start=" + start + "&end=" + end, function(energy) {
+	d3.json("terms?q=" + q + "&start=" + start + "&end=" + end, function(energy) {
 		$("#chart").removeClass("loading");
 		//data transformation
 		var terms = {};

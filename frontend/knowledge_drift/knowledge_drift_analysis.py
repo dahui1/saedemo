@@ -2,6 +2,7 @@ import sys
 sys.path.append("../")
 
 from saeclient import SAEClient
+from teclient import TermExtractorClient
 
 from utils.algorithms import *
 from collections import defaultdict
@@ -15,10 +16,12 @@ import logging
 from sklearn.cluster import Ward, KMeans, MiniBatchKMeans, spectral_clustering
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+term_extractor = TermExtractorClient()
 
 class KnowledgeDrift(object):
-    def __init__(self, client):
+    def __init__(self, client, data_set="academic"):
         self.client = client
+        self.data_set = data_set
         self.stop_words = ["data set", "training data", "experimental result", 
                            "difficult learning problem", "user query", "case study", 
                            "web page", "data source", "proposed algorithm", 
@@ -131,7 +134,10 @@ class KnowledgeDrift(object):
 
     def search_document_by_author(self, a, start_time=0, end_time=10000):
         logging.info("querying documents for %s from %s to %s" % (a.title, start_time, end_time))
-        result = self.client.pub_search_by_author("academic", a.id)
+        if self.data_set == "academic":
+            result = self.client.pub_search_by_author(self.data_set, a.id)
+        elif self.data_set == "patent":
+            result = self.client.patent_search_by_inventor(self.data_set, a.id)
         logging.info("found %s documents" % len(result.entity))
         #text for extract key terms
         text = ""
@@ -152,12 +158,37 @@ class KnowledgeDrift(object):
                             term_set.add(t)
         return term_set
 
+    def search_document_by_author_with_ext(self, a, start_time=0, end_time=10000):
+        logging.info("querying documents for %s from %s to %s" % (a.title, start_time, end_time))
+        if self.data_set == "academic":
+            result = self.client.pub_search_by_author(self.data_set, a.id)
+        elif self.data_set == "patent":
+            result = self.client.patent_search_by_inventor(self.data_set, a.id)
+        logging.info("found %s documents" % len(result.entity))
+        #text for extract key terms
+        text = ""
+        term_set = set()
+        for p in result.entity:
+            #update time info
+            publication_year = p.stat[0].value
+            if publication_year >= start_time and publication_year <= end_time:
+                self.set_time(publication_year)
+                text += (p.title.lower() + " . " + p.description.lower() +" . ")
+                #insert document
+                self.append_documents(p)
+        return text
+
     def search_author(self, q, time_window, start_time, end_time):
         print q, time_window, start_time, end_time
         self.author_result = []
         term_set = defaultdict(int)
         for qu in q:
-            self.author_result.extend(self.client.author_search("academic", qu, 0, 50).entity)
+            if self.data_set == "academic":
+                self.author_result.extend(self.client.author_search(self.data_set, qu, 0, 50).entity)
+            elif self.data_set == "patent":
+                for e in self.client.inventor_search(self.data_set, qu, 0, 50).entity:
+                    if len(e.title) > 2:
+                        self.author_result.append(e)
             print len(self.author_result)
             term_set[qu] = 1000
         index = 0
@@ -165,13 +196,19 @@ class KnowledgeDrift(object):
             #insert author
             self.append_authors(a)
             #search for document
-            ts = self.search_document_by_author(a, start_time=start_time, end_time=end_time)
-            #term_set.union(t)
-            #extract terms
-            # terms = term_extractor.extractTerms(text)
-            for t in ts:
-                if t not in self.stop_words:
-                    term_set[t] += 1
+            if self.data_set == "academic":
+                ts = self.search_document_by_author(a, start_time=start_time, end_time=end_time)
+                for t in ts:
+                    if t not in self.stop_words:
+                        term_set[t] += 1
+            elif self.data_set == "patent":
+                # extract terms
+                text = self.search_document_by_author_with_ext(a, start_time=start_time, end_time=end_time)
+                terms = term_extractor.extractTerms(text)
+                for t in terms:
+                    if t not in self.stop_words:
+                        term_set[t] += 1
+
         sorted_term_set = sorted(term_set.keys(), key=lambda x:term_set[x], reverse=True)
         self.set_terms(sorted_term_set[:100])
         #caculate term frequence
@@ -546,7 +583,8 @@ class KnowledgeDrift(object):
         for i, doc in enumerate(self.document_list):
             self.graph["documents"].append({"idx":i, "id":int(doc.id), "title":doc.title, 
                                            "year":int(doc.stat[0].value), #"jconf":doc.jconf_name, #"abs":doc.abs,
-                                           "cite":int(doc.stat[2].value)})#, "authors":doc.author_ids, "topic":doc.topic})
+                                           #"cite":int(doc.stat[2].value)
+                                           })#, "authors":doc.author_ids, "topic":doc.topic})
         #time slides
         self.graph["time_slides"] = self.time_slides
         return self.graph

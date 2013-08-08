@@ -16,7 +16,13 @@ import json
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 client = SAEClient("tcp://127.0.0.1:40115")
-knowledge_drift_client = KnowledgeDrift(client)
+
+knowledge_drift_clients = {}
+def get_knowledge_drift_client(dataset):
+    global client
+    if dataset not in knowledge_drift_clients:
+        knowledge_drift_clients[dataset] = KnowledgeDrift(client, dataset)
+    return knowledge_drift_clients[dataset]
 
 ask_influ=influence_analysis.asker(client)
 ask_tre=influence_analysis.asker_t(client)
@@ -168,14 +174,14 @@ def search(data):
     start = int(request.query.start) or 0
     end = int(request.query.end) or 10000
     print 'rendering terms for', q, 'on', data, 'between', start, "and", end
-    return knowledge_drift_client.query_terms(q, start_time=start, end_time=end)
+    return get_knowledge_drift_client(data).query_terms(q, start_time=start, end_time=end)
 
 @route('/<data>/render')
 def topic_trends(data):
     q = request.query.q or ''
     threshold = request.query.threshold or ''
     print 'rendering trends for', q, threshold, 'on', data
-    return knowledge_drift_client.query_topic_trends(q, float(threshold))
+    return get_knowledge_drift_client(data).query_topic_trends(q, float(threshold))
 
 @route('/academic/<uid:int>/influence/trends')
 def influence_trends( uid):
