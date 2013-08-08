@@ -6,6 +6,7 @@ from bottle import route, run, template, view, static_file, request, urlencode
 from saeclient import SAEClient
 import logging
 
+import network_integration
 from knowledge_drift import KnowledgeDrift
 import influence_analysis
 import time
@@ -26,13 +27,13 @@ def index():
     return template('index')
 
 
-@route('/<dataset>/search')
+@route('/academic/search')
 @view('search')
-def search(dataset):
+def search():
     q = request.query.q or ''
     print 'searching', q, 'in academic'
-    result = client.author_search(dataset, q, 0, 20)
-    pub_result = client.pub_search(dataset, q, 0, 20)
+    result = client.author_search("", q, 0, 20)
+    pub_result = client.pub_search("", q, 0, 20)
 
     return dict(
         query=q,
@@ -49,7 +50,8 @@ def search(dataset):
                     (s.type, s.value) for s in e.stat
                 ),
                 topics=e.topics.split(','),
-                imgurl=e.imgurl
+                imgurl=e.imgurl,
+                integrated=network_integration.query(e.original_id)
             ) for e in result.entity
         ],
         extra_results_list=[
@@ -71,11 +73,38 @@ def search(dataset):
 def search():
     q = request.query.q or ''
     print 'searching', q, 'in patent'
+    result = client.group_search("", q, 0, 20)
+    pub_result = client.patent_search("", q, 0, 20)
+
     return dict(
         query=q,
-        count=0,
-        results=[],
-        encoded_query=urlencode({"q": q})
+        encoded_query=urlencode({"q": result.query}),
+        count=result.total_count,
+        results_title='Companies',
+        results=[
+            dict(
+                id=e.id,
+                name=e.title,
+                url="http://pminer.org/company.do?m=viewCompany&id=%s" % e.original_id,
+                description=e.description,
+                stats=dict(
+                    (s.type, s.value) for s in e.stat
+                ),
+                topics=e.topics.split(','),
+                imgurl=e.imgurl
+            ) for e in result.entity
+        ],
+        extra_results_list=[
+            dict(
+                title="Patents",
+                items=[
+                    dict(
+                        text=pub.title,
+                        link="http://pminer.org/patent.do?m=viewPatent&id=%s" % pub.original_id
+                    ) for pub in pub_result.entity
+                ]
+            ),
+        ]
     )
 
 
@@ -84,11 +113,38 @@ def search():
 def search():
     q = request.query.q or ''
     print 'searching', q, 'in weibo'
+    result = client.weibo_search("", q, 0, 20)
+    pub_result = client.user_search("", q, 0, 20)
+
     return dict(
         query=q,
-        count=0,
-        results=[],
-        encoded_query=urlencode({"q": q})
+        encoded_query=urlencode({"q": result.query}),
+        count=result.total_count,
+        results_title='Weibo',
+        results=[
+            dict(
+                id=e.id,
+                name=e.title,
+                url="http://weibo.com/%s" % e.original_id,
+                description=e.description,
+                stats=dict(
+                    (s.type, s.value) for s in e.stat
+                ),
+                topics=e.topics.split(','),
+                imgurl=e.imgurl
+            ) for e in result.entity
+        ],
+        extra_results_list=[
+            dict(
+                title="Users",
+                items=[
+                    dict(
+                        text=pub.title,
+                        link="http://weibo.com/u/%s" % pub.original_id
+                    ) for pub in pub_result.entity
+                ]
+            ),
+        ]
     )
 
 

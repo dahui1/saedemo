@@ -24,7 +24,8 @@ struct AMinerData {
         return parse<T>(vi->Data());
     }
 
-    indexing::SearchResult search_publications(const string& query, int limit = 5000) const;
+    indexing::SearchResult search(const std::string& type, const std::string& query, int limit = 5000) const;
+    indexing::SearchResult search_publications(const std::string& query, int limit = 5000) const;
 
     std::vector<indexing::Index> pub_index_shards;
     std::unique_ptr<sae::io::MappedGraph> g;

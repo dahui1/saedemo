@@ -44,9 +44,11 @@ int main() {
     builder.AddEdgeDataType("PatentGroup");
     builder.AddEdgeDataType("PatentCompany");
     builder.AddEdgeDataType("CompanyGroup");
+    builder.AddEdgeDataType("GroupInfluence");
 
     cerr << "Loading company_ori.txt..." << endl;
     map<int, int> com2group;
+    map<int, string> group_logo;
     ifstream company_file("company_ori.txt");
     string company_input;
     while (getline(company_file, company_input)) {
@@ -62,6 +64,9 @@ int main() {
 
         Company company{id, name, patCount, logo, homepage, terms, gcid};
         com2group[id] = gcid;
+        if (logo.size() > 0 && group_logo[gcid].size() == 0) {
+            group_logo[gcid] == logo;
+        }
         builder.AddVertex(COMPANY_BASE + id, company, "Company");
     }
 
@@ -74,7 +79,7 @@ int main() {
         string name = inputs[1];
         int patentCount = convert_to_int(inputs[2]);
 
-        Group group{id, name, patentCount};
+        Group group{id, name, patentCount, group_logo[id]};
         builder.AddVertex(GROUP_BASE + id, group, "Group");
     }
     group_file.close();
@@ -85,15 +90,18 @@ int main() {
     string patent_input;
     while (getline(patent_file, patent_input)) {
         vector<string> inputs = split(patent_input, '\t');
+        // ignore empty inventors
+        if (inputs[3].size() == 0) continue;
         int id = convert_to_int(inputs[0]);
-        string title = inputs[1];
-        vector<string> inventors = split(inputs[2].substr(1, inputs[2].size() - 1), '#');
+        string title = inputs[2];
+        auto inventors = split(inputs[3].substr(1, inputs[2].size() - 1), '#');
+        int year = stoi(inputs[4].substr(0, 4));
 
         for (auto it = inventors.begin(); it!=inventors.end(); it++) {
             inventor_map[*it].push_back(id);
         }
-        
-        Patent patent{id, title};
+
+        Patent patent{id, title, year};
         builder.AddVertex(PATENT_BASE + id, patent, "Patent");
     }
     patent_file.close();
@@ -125,6 +133,23 @@ int main() {
         int com = (*it).first;
         int group = (*it).second;
         builder.AddEdge(COMPANY_BASE + com, GROUP_BASE + group, CompanyGroup(), "CompanyGroup");
+    }
+
+    cerr << "Loading group influence ..." << endl;
+    {
+        ifstream influence("C2CTInfluence.txt.filtered");
+        GroupInfluence gi;
+        int source, target;
+        int count;
+        while (influence >> source >> target >> gi.topic >> gi.score) {
+            if (group_logo.find(source) == group_logo.end() || group_logo.find(target) == group_logo.end()) {
+                cerr << "group not found: " << source << ", or, " << target << endl;
+            } else {
+                builder.AddEdge(GROUP_BASE + source, GROUP_BASE + target, gi, "GroupInfluence");
+                count ++;
+            }
+        }
+        cerr << "group influence loaded: " << count << endl;
     }
 
     cerr << "Saving graph pminer..." << endl;

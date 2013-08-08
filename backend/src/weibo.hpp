@@ -45,7 +45,7 @@ struct User {
     //bool following;
 };
 
-struct     Weibo {
+struct Weibo {
     string user_id;
     string created_at;
     string text;

@@ -109,6 +109,14 @@ AMinerData::~AMinerData() {
     LOG(INFO) << "releasing aminer data...";
 }
 
+SearchResult AMinerData::search(const string& type, const string& query, int limit) const {
+    if (type == "Publication") {
+        return search_publications(query, limit);
+    }
+    LOG(ERROR) << "Search type not supported!";
+    return SearchResult();
+}
+
 SearchResult AMinerData::search_publications(const string& query, int limit) const {
     vector<SearchResult> results(pub_index_shards.size());
     auto index_searcher = [&](int shard_id) {

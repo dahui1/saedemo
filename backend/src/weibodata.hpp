@@ -21,8 +21,14 @@ struct WeiboData {
         vi->MoveTo(id);
         return parse<T>(vi->Data());
     }
-	
-    indexing::SearchResult search_weibos(const string& query, int limit = 5000) const;
+
+    indexing::SearchResult search_weibos(const std::string& query, int limit = 5000) const;
+    indexing::SearchResult search(const std::string& type, const string& query, int limit = 5000) const {
+        if (type == "Weibo") {
+            return search_weibos(query, limit);
+        }
+        return indexing::SearchResult();
+    }
 
     std::vector<indexing::Index> weibo_index_shards;
     std::unique_ptr<sae::io::MappedGraph> g;

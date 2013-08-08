@@ -217,26 +217,94 @@ bool SearchService::InfluenceSearchByAuthor(const string& input, string& output)
     return response.SerializeToString(&output);
 }
 
+bool SearchService::PatentSearchByGroup(const string& input, string& output) {
+    EntitySearchRequest request;
+    request.ParseFromString(input);
+
+    EntitySearchResponse response;
+    response.set_query(request.query());
+
+    auto gid = stoi(request.query());
+    auto vit = pminer->g->Vertices();
+    vit->MoveTo(gid);
+    int count = 0;
+    for (auto eit = vit->InEdges(); eit->Alive(); eit->Next()) {
+        if (eit->TypeName() == "PatentGroup") {
+            auto vi = pminer->g->Vertices();
+            vi->MoveTo(eit->SourceId());
+            auto pat = parse<Patent>(vi->Data());
+            DetailedEntity *de = response.add_entity();
+            de->set_id(eit->TargetId());
+            de->set_title(pat.title);
+            auto stat = de->add_stat();
+            stat->set_type("year");
+            stat->set_value(pat.year);
+
+            count ++;
+        }
+    }
+
+    response.set_total_count(count);
+
+    return response.SerializeToString(&output);
+}
+
+
+
+bool SearchService::PatentSearchByInventor(const string& input, string& output) {
+    EntitySearchRequest request;
+    request.ParseFromString(input);
+
+    EntitySearchResponse response;
+    response.set_query(request.query());
+
+    auto iid = stoi(request.query());
+    auto vit = pminer->g->Vertices();
+    vit->MoveTo(iid);
+    int count = 0;
+    for (auto eit = vit->OutEdges(); eit->Alive(); eit->Next()) {
+        if (eit->TypeName() == "PatentInventor") {
+            auto vi = pminer->g->Vertices();
+            vi->MoveTo(eit->TargetId());
+            auto pat = parse<Patent>(vi->Data());
+            DetailedEntity *de = response.add_entity();
+            de->set_id(eit->TargetId());
+            de->set_title(pat.title);
+            auto stat = de->add_stat();
+            stat->set_type("year");
+            stat->set_value(pat.year);
+
+            auto re = de->add_related_entity();
+            re->set_type("Inventor");
+            for (auto ei = vi->InEdges(); ei->Alive(); ei->Next()) {
+                if (ei->TypeName() == "PatentInventor") {
+                    re->add_id(ei->SourceId());
+                }
+            }
+
+            count ++;
+        }
+    }
+
+    response.set_total_count(count);
+
+    return response.SerializeToString(&output);
+}
+
+
 bool SearchService::PatentSearch(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
     string query = request.query();
-    
-    int offset, count;
-    if (request.has_offset())
-        offset = request.offset();
-    else
-        offset = 0;
-    if (request.has_count())
-        count = request.count();
-    else
-        count = 50;
+
+    int offset = request.has_offset() ? request.offset() : 0;
+    int count = request.has_count() ? request.count() : 50;
 
     auto result = pminer->search_patents(query);
 
     if (result.size() > 5000)
         result.resize(5000);
-    
+
     EntitySearchResponse response;
     response.set_total_count(result.size());
     response.set_query(query);
@@ -244,8 +312,22 @@ bool SearchService::PatentSearch(const string& input, string& output) {
         auto i = result[ri];
         DetailedEntity *de = response.add_entity();
         auto p = pminer->get<Patent>(i.docId);
-        de->set_title(p.title);
         de->set_id(i.docId);
+        de->set_title(p.title);
+        de->set_original_id(p.id);
+        auto stat = de->add_stat();
+        stat->set_type("year");
+        stat->set_value(p.year);
+
+        auto re = de->add_related_entity();
+        re->set_type("Inventor");
+        auto vi = pminer->g->Vertices();
+        vi->MoveTo(i.docId);
+        for (auto ei = vi->InEdges(); ei->Alive(); ei->Next()) {
+            if (ei->TypeName() == "PatentInventor") {
+                re->add_id(ei->SourceId());
+            }
+        }
     }
     return response.SerializeToString(&output);
 }
@@ -254,15 +336,9 @@ bool SearchService::GroupSearch(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
     string query = request.query();
-    int offset, count;
-    if (request.has_offset())
-        offset = request.offset();
-    else
-        offset = 0;
-    if (request.has_count())
-        count = request.count();
-    else
-        count = 50;
+
+    int offset = request.has_offset() ? request.offset() : 0;
+    int count = request.has_count() ? request.count() : 50;
 
     auto result = GroupSearcher(*pminer).search(query);
     EntitySearchResponse response;
@@ -272,15 +348,71 @@ bool SearchService::GroupSearch(const string& input, string& output) {
         auto i = result[ri];
         DetailedEntity *de = response.add_entity();
         auto p = pminer->get<Group>(i.docId);
-        de->set_title(p.name);
         de->set_id(i.docId);
-        char temp[10];
-        sprintf(temp, "%d", p.patCount);
-        string patCount = temp;
-        de->set_description(patCount);
+        de->set_title(p.name);
+        de->set_imgurl(p.imgurl);
+        auto stat = de->add_stat();
+        stat->set_type("Patents");
+        stat->set_value(p.patCount);
+        de->set_original_id(p.id);
     }
     return response.SerializeToString(&output);
 }
+
+bool SearchService::InventorSearch(const string& input, string& output) {
+    EntitySearchRequest request;
+    request.ParseFromString(input);
+    string query = request.query();
+    int offset = request.has_offset() ? request.offset() : 0;
+    int count = request.has_count() ? request.count() : 50;
+
+    auto result = InventorSearcher(*pminer).search(query);
+    EntitySearchResponse response;
+    response.set_total_count(result.size());
+    response.set_query(query);
+    for (int ri = offset; ri < result.size() && ri - offset < count; ri++) {
+        auto i = result[ri];
+        DetailedEntity *de = response.add_entity();
+        auto p = pminer->get<Inventor>(i.docId);
+        de->set_id(i.docId);
+        de->set_title(p.name);
+    }
+    return response.SerializeToString(&output);
+}
+
+bool SearchService::InfluenceSearchByGroup(const string& input, string& output) {
+    EntitySearchRequest request;
+    request.ParseFromString(input);
+
+    InfluenceSearchResponse response;
+
+    auto gid = stoi(request.query());
+    response.set_entity_id(gid);
+
+    auto vit = pminer->g->Vertices();
+    vit->MoveTo(gid);
+    for (auto eit = vit->OutEdges(); eit->Alive(); eit->Next()) {
+        if (eit->TypeName() == "GroupInfluence") {
+            auto gi = parse<GroupInfluence>(eit->Data());
+            Influence *inf = response.add_influence();
+            inf->set_id(eit->TargetId());
+            inf->set_topic(gi.topic);
+            inf->set_score(gi.score);
+        }
+    }
+    for (auto eit = vit->InEdges(); eit->Alive(); eit->Next()) {
+        if (eit->TypeName() == "GroupInfluence") {
+            auto gi = parse<GroupInfluence>(eit->Data());
+            Influence *inf = response.add_influenced_by();
+            inf->set_id(eit->SourceId());
+            inf->set_topic(gi.topic);
+            inf->set_score(gi.score);
+        }
+    }
+
+    return response.SerializeToString(&output);
+}
+
 
 bool SearchService::WeiboSearch(const string& input, string& output) {
     EntitySearchRequest request;
@@ -308,6 +440,12 @@ bool SearchService::WeiboSearch(const string& input, string& output) {
         auto p = weibo->get<Weibo>(i.docId);
         de->set_title(p.text);
         de->set_id(i.docId);
+        auto stat = de->add_stat();
+        stat->set_type("Reposts");
+        stat->set_value(p.reposts_count);
+        stat = de->add_stat();
+        stat->set_type("Comments");
+        stat->set_value(p.comments_count);
         de->set_description(p.created_at);
     }
     return response.SerializeToString(&output);
@@ -328,7 +466,7 @@ bool SearchService::UserSearch(const string& input, string& output) {
         count = request.count();
     else
         count = 50;
-	
+
     auto result = UserSearcher(*weibo).search(query);
     EntitySearchResponse response;
     response.set_total_count(count);
@@ -337,10 +475,14 @@ bool SearchService::UserSearch(const string& input, string& output) {
         auto i = result[ri];
         DetailedEntity *de = response.add_entity();
         auto p = weibo->get<User>(i.docId);
-        de->set_title(p.name);
         de->set_id(i.docId);
+        de->set_title(p.name);
         de->set_description(p.description);
         de->set_imgurl(p.profile_image_url);
+        auto stat = de->add_stat();
+        stat->set_type("Followers");
+        stat->set_value(p.followers_count);
+        de->set_original_id(stoi(p.id));
     }
     return response.SerializeToString(&output);
 }

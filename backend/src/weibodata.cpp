@@ -96,7 +96,7 @@ SearchResult WeiboData::search_weibos(const string& query, int limit) const {
         SearchResult rs;
         return rs;
     }
-    const char* sentenct = query.c_str();
+    const char* sentence = query.c_str();
     unsigned int nPaLen=strlen(sentence); 
     char* sRst=0; 
     sRst=(char *)malloc(nPaLen*6); 

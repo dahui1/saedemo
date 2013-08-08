@@ -10,7 +10,7 @@
 		<legend>Entity Search</legend>
 		<input type="text" class="search-query" name="q" placeholder="type in a topic, e.g. data mining" value="{{query}}"/>
 		<button class="btn btn-primary" type="submit">Search</button>
-		<button class="btn btn-analysis">Topic Analysis</button>
+		<button class="btn btn-analysis">Knowledge Drifting</button>
 	</fieldset>
 </form>
 
@@ -33,6 +33,9 @@
 			<div class="item-description span10">
 				<div class="item-name">
 					<a href="{{item['url']}}">{{item['name']}}</a>
+					%for k, v in item['integrated'].items():
+					<span>[<a href="{{v['url']}}">{{k}}</a>]</span>
+					%end
 					<span class="pull-right">[<a href="{{item['id']}}/influence">Influence Analysis</a>]</span>
 				</div>
 				{{item['description']}}
