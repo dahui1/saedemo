@@ -42,16 +42,17 @@ int main() {
     builder.AddVertexDataType("User");
     builder.AddVertexDataType("Weibo");
     builder.AddEdgeDataType("UserWeibo");
+	builder.AddEdgeDataType("UserInfluence");
 
     cerr << "Loading userinfo.txt..." << endl;
-    ifstream user_file("userinfo.txt");
+    ifstream user_file("userIDName.txt");
     string user_input;
     int i = 0;
     map<string, int> userid;
     while (getline(user_file, user_input)) {
         vector<string> inputs = split(user_input, '\t');
         User user;
-        user.domain = inputs[1];
+        /*user.domain = inputs[1];
         user.avatar_large = inputs[2];
         user.bi_followers_count = convert_to_int(inputs[3]);
         user.block_word = convert_to_int(inputs[4]);
@@ -86,7 +87,10 @@ int main() {
         user.gender = inputs[33];
         user.created_at = inputs[34];
         //user.verified_type = inputs[35];
-        //user.following = convert_to_bool(inputs[36]);
+        //user.following = convert_to_bool(inputs[36]);*/
+		user.id = inputs[0];
+		user.name = inputs[1];
+		user.followers_count = inputs[2];
         userid[user.id] = i;
         builder.AddVertex(USER_BASE + i++, user, "User");
     }
@@ -97,8 +101,8 @@ int main() {
     for (i = 0; i < 10; i++) {
         string weibo_input;
         char id = '0' + i;
-                string path = "mongodbdata/temp";
-                path += id;
+        string path = "mongodbdata/temp";
+        path += id;
         path += ".txt";
         cout << "Loading file: " <<  path << endl;
         ifstream weibo_file(path);
@@ -115,6 +119,17 @@ int main() {
         }
         weibo_file.close();
     }
+    
+    cerr << "Loading user influence data..." << endl;
+    ifstream user2user("User2User.txt");
+    string influence;
+    while (getline(user2user, influence)) {
+        vector<string> inputs = split(influence, '\t');
+        UserInfluence ui;
+        ui.weight = inputs[2];
+        builder.AddEdge(USER_BASE + userid[inputs[0]], USER_BASE + userid[inputs[1]], ui, "UserInfluence");
+    }
+	user2user.close();
     
     cerr << "Saving graph weibo..." << endl;
     builder.Save("weibo");

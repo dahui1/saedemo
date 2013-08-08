@@ -54,9 +54,11 @@ struct Weibo {
 };
 
 struct UserWeibo {
-    
 };
 
+struct UserInfluence {
+    int weight;
+}
 
 namespace sae {
     namespace serialization {
