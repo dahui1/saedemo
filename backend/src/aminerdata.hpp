@@ -28,5 +28,7 @@ struct AMinerData {
 
     std::vector<indexing::Index> pub_index_shards;
     std::unique_ptr<sae::io::MappedGraph> g;
+	std::unordered_map<string, vector<std::pair<int, int>>> name2id;
+	std::unordered_map<int, std::pair<string, int>> id2name;
 };
 

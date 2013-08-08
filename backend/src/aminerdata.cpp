@@ -1,4 +1,6 @@
 #include <atomic>
+#include <algorithm>
+#include <ctype.h>
 #include "glog/logging.h"
 #include "aminerdata.hpp"
 #include "thread_util.hpp"
@@ -43,6 +45,31 @@ AMinerData::AMinerData(char const * prefix) {
     auto total = g->VertexCountOfType("Publication");
     auto shard_size = total / shards;
     atomic<int> processed(0);
+    
+    LOG(INFO) << "mapping author id to author name...";
+    auto authoroff = g->VerticesOfType("Author")->GlobalId();
+    auto authortotal = authoroff + g->VertexCountOfType("Author");
+    auto author = g->Vertices();
+    for (auto i = authoroff; i < authortotal && author->Alive(); i++, author->MoveTo(i)) {
+        if (author->TypeName() == "Author") {
+            auto a = parse<Author>(author->Data());
+            int id = author->GlobalId();
+            if (a.names.size() == 0) continue;
+            string name = a.names[0];
+            int hindex = a.h_index;
+            id2name[id] = make_pair (name, hindex);
+            auto f = name2id.find(name);
+            if (f == name2id.end()) {
+                vector<pair<int,int>> names;
+                std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+                names.push_back(make_pair (id, hindex));
+                name2id[name] = names;
+            }
+            else {
+                f->second.push_back(make_pair(id, hindex));
+            }
+        }
+    }
     auto index_builder = [&](int shard_id) {
         auto ai = g->Vertices();
         auto start = offset + shard_id * shard_size;
@@ -52,6 +79,15 @@ AMinerData::AMinerData(char const * prefix) {
             if (ai->TypeId() == publication_type){
                 auto p = parse<Publication>(ai->Data());
                 string text = p.title + " " + p.abstract;
+                auto ap = ai->InEdges();
+                while (ap->Alive()) {
+                    if (ap->TypeName() == "Publish") {
+                        auto temp = id2name.find(ap->TargetId());
+                        if (temp != id2name.end())
+                        text += " " + temp->second.first;
+                    }
+                    ap->Next();
+                }
                 unique_ptr<TokenStream> stream(ArnetAnalyzer::tokenStream(text));
                 pub_index_shards[shard_id].addSingle(ai->GlobalId(), 0, stream, avgLen);
             }
