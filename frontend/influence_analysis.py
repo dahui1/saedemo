@@ -182,7 +182,7 @@ class asker_table():
             influenced_by[top_id].sort(key=lambda x:x.score,reverse=True)
             num_1=min(5,num_influence[top_id])
             num_2=min(5,num_influenced_by[top_id])
-            num[i]=num_1+num_2
+            num[i]=num_1+num_2+1
             table={}
             table['nodes']=[]
             table['links']=[]
@@ -190,33 +190,65 @@ class asker_table():
                 peo[i][j]=influence[top_id][j].id
             for j in range(0,num_2):
                 peo[i][j+num_1]=influenced_by[top_id][j].id
+            peo[i][num[i]-1]=a
+            st=set()
             for j in range(0,num[i]):
                 tmp={}
                 tmp_id=peo[i][j]
+                st.add(peo[i][j])
                 result=self.client.author_search_by_id("",[tmp_id])
                 tmp['name']=result.entity[0].title
                 tmp['group']=2
                 table['nodes'].append(tmp)
+            #print st
+            #res_in=[[]for x in range(100)]
+            #for j in range(0,num[i]):
+                #res_in[j]=self.client.influence_search_by_author("",peo[i][j]).influence
             for j in range(0,num[i]):
                 pub=self.client.influence_search_by_author("",peo[i][j])
-                for k in range(0,num[i]):
-                    if j==k:
-                        continue
-                    tmp={}
-                    tmp['source']=j
-                    tmp['target']=k 
-                    weight=0.0
-                    for l in pub.influence:
-                        if l.topic==top_id and l.id==peo[i][k]:
-                            weight=l.score
-                            break
-                    if weight==0:
-                        continue
-                    weight=weight**(1.0/3)
-                    if weight<0.5:
-                        weight+=0.3
-                    tmp['value']=weight
-                    table['links'].append(tmp)
+                tmp={}
+                weight=0.0       
+                for l in pub.influence:
+                    if l.topic==top_id and (l.id in st)==True:
+                        weight=l.score
+                        k=l.id
+                        break      
+                #if weight==0:
+                   # for l in pub.influence:
+                        #pub2=self.client.influence_search_by_author("",l.id)
+                        #flag=0
+                        #for q in pub2.influence:
+                           # if q.topic==top_id and (q.id in st)==True:
+                           #     weight=q.score
+                          #      flag=1
+                        #        break
+                      #  if flag==1:
+                      #      break
+                        """
+                        if l.topic==top_id:
+                            pub2=self.client.influence_search_by_author("",l.id)
+                            flag=0
+                            for q in pub2.influence:
+                                if q.topic==top_id and (q.id in st)==True:
+                                    weight=q.score
+                                    flag=1
+                                    break
+                            if flag==1:
+                                break
+                        """
+                if weight==0:
+                    continue
+                weight=weight**(1.0/3)
+                if weight<0.5:
+                    weight+=0.3
+                tmp['source']=j
+                for q in range(0,num[i]):
+                    if peo[i][q]==k:
+                        res=q
+                        break
+                tmp['target']=q
+                tmp['value']=weight
+                table['links'].append(tmp)
             table_list.append(table)
         return table_list
     

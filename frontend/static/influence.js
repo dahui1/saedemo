@@ -96,21 +96,18 @@ function drawChart() {
 				.style("opacity", 1e-6)
 				.remove();	
 	
-	$('svg circle').tipsy({ 
-        gravity: 'w', 
-        html: true, 
-        title: function() {
-        var d = this.__data__;
-		  if (d.pap2!=0){
-          return '<span class="title">' + d.pap1 +'<br></span><span class="author">'+d.au1 + ' </span><br>'+d.year+'<span class="cita">CitedBy: ' + d.cit1
+	$('svg circle').hover(function() {
+	  var d = this.__data__;
+	  var html;
+	  if (d.pap2!=0){
+	    html = '<span class="title">' + d.pap1 +'<br></span><span class="author">'+d.au1 + ' </span><br>'+d.year+'<span class="cita">CitedBy: ' + d.cit1
 		  +'</span><br><span class="title"><br>' + d.pap2  +'<br></span><span class="author">'+d.au2 +'</span><br> '+d.year+'<span class="cita">CitedBy: ' 
 		  + d.cit2 +"</span>";
-		  }else{
-		  return '<span class="title">' + d.pap1+'<br></span><span class="author">'+d.au1 + ' </span><br>'+d.year+'<span class="cita">Citations: ' + d.cit1;
-		  }
-        }
-      });	
-    //});
+	  } else {
+	    html = '<span class="title">' + d.pap1+'<br></span><span class="author">'+d.au1 + ' </span><br>'+d.year+'<span class="cita">Citations: ' + d.cit1;
+	  }
+	  $('.detailed-info').html(html);
+        });
   });
 };
 
@@ -190,8 +187,8 @@ var svg = d3.select(".topic-analysis.index" + index + " .table").append("svg")//
 
   // Convert links to matrix; count character occurrences.
   miserables[index].links.forEach(function(link) {
-    
-    matrix[link.source][link.target].z += link.value;
+    //alert(link.value);
+      matrix[link.source][link.target].z += link.value;
    // nodes[link.source].count += link.value;
    // nodes[link.target].count += link.value;
   });

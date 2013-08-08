@@ -25,16 +25,21 @@
 	   stroke-width: 2;
 	   fill: #FFF;
     }
+    
+    .detailed-info {
+		line-height: 1;
+		font-size: 12px;
+	}
 	
 	.title{
 		color: rgb(51, 51, 51);
 cursor: auto;
 display: inline;
 font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-font-size: 15px;
+font-size: 12px;
 font-weight: bold;
 height: auto;
-line-height: 16px;
+line-height: 14px;
 list-style-image: none;
 list-style-position: outside;
 list-style-type: none;
@@ -53,7 +58,7 @@ font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 font-size: 12px;
 font-weight: bold;
 height: auto;
-line-height: 16px;
+line-height: 14px;
 list-style-image: none;
 list-style-position: outside;
 list-style-type: none;
@@ -65,6 +70,7 @@ text-decoration: none;
 width: auto;
 	}
 	.cita{
+	font-size: 12px;
 		color: white;
 		display:block;
 		float:right;
@@ -109,6 +115,8 @@ width: auto;
         <div class="span7">
             <div class="influence-graph" style="height: 200px; width: 100%;"></div>
         </div>
+	<div class="span3 detailed-info">
+	</div>
     </div>
 	
 </div>

@@ -2,7 +2,7 @@ class asker_p():
 
     def __init__(self, client):
         self.a=int()
-        self.tname=[]
+        self.tname=["" for x in range(1000)]
         self.read_topic()
         self.client = client
 
@@ -22,21 +22,21 @@ class asker_p():
             top_id=score[i]['topic']
             tot=score[i]['score']
             top_pie_t={}
-            #tmp=self.tname[int(top_id)].split('/')
-            #top_pie_t['label']=tmp[0]
-            top_pie_t['label']=str(top_id)
+            tmp=self.tname[int(top_id)].split(':')
+            top_pie_t['label']=tmp[0]
             top_pie_t['value']=tot
             top_pie.append(top_pie_t)
         return top_pie
 
     def read_topic(self):
-        fileHandle = open ('topic2name.txt')
+        fileHandle = open ('usclassTitle.txt')
         fileList = fileHandle.readlines()
         i=0
         for fileLine in fileList:
             words=fileLine.split('\t')
+            top=int(words[0])
             tmp=words[1].split('\n')
-            self.tname.append(tmp[0])
+            self.tname[top]=tmp[0]
         fileHandle.close()
 
     def ask(self, id):
@@ -49,7 +49,6 @@ class asker_p():
         for i in range(1000):
             score[i]['score']=0
             score[i]['topic']=0
-            score[i]['num']=0
         influence=[[]for x in range(1000)]
         influenced_by=[[]for x in range(1000)]
         num_influence=[0 for x in range(1000)]
@@ -66,27 +65,23 @@ class asker_p():
         top_list=[]
         for i in range(0, 5):
             top_id=score[i]['topic']
-            #print top_id,score[i]['score']
             topics = {}
             topics['influencers']=[]
             topics['influencees']=[]
-            topics['topic']=top_id
-            #influence[top_id].sort(key=lambda x:x.score,reverse=True)
-            #influenced_by[top_id].sort(key=lambda x:x.score,reverse=True)
+            tmp=self.tname[int(top_id)].split(':')
+            topics['topic']=tmp[0]
+            influence[top_id].sort(key=lambda x:x.score,reverse=True)
+            influenced_by[top_id].sort(key=lambda x:x.score,reverse=True)
             num_1=min(5,num_influence[top_id])
             num_2=min(5,num_influenced_by[top_id])
             for j in range(0,num_1):
                 temp=[]
-                #result=self.client.author_search_by_id("",[influence[top_id][j].id])
-                #.append(result.entity[0].title)
-                temp.append(influence[top_id][j].id)
+                result=self.client.group_search_by_id("",[influence[top_id][j].id])
+                temp.append(result.entity[0].title)
+                #temp.append(influence[top_id][j].id)
                 temp.append(influence[top_id][j].score)
-                #print top_id,j
-                #print influence[top_id][j].id,influence[top_id][j].score
-                #tmp_l[1]=influence[top_id][j].score
-                #tmp_l.append(influence[top_id][j].score)
-		url="http://arnetminer.org/person/-/"
-		#url+=str(result.entity[0].original_id)
+		url="http://www.pminer.org/company.do?m=viewCompany&id="
+		url+=str(result.entity[0].original_id)
 		temp.append(url)
                 tmp_t=tuple(temp)
                 topics['influencees'].append(tmp_t)
@@ -94,19 +89,19 @@ class asker_p():
                 if (influenced_by[top_id][j].id==a):
                     continue
                 temp=[]
-                #result=self.client.author_search_by_id("",[influenced_by[top_id][j].id])
-                #tmp_l.append(result.entity[0].title)
-                temp.append(influenced_by[top_id][j].id)
+                result=self.client.group_search_by_id("",[influenced_by[top_id][j].id])
+                temp.append(result.entity[0].title)
+                #temp.append(influenced_by[top_id][j].id)
                 temp.append(influenced_by[top_id][j].score)
-                url="http://arnetminer.org/person/-/"
-		#url+=str(result.entity[0].original_id)
+                url="http://www.pminer.org/company.do?m=viewCompany&id="
+		url+=str(result.entity[0].original_id)
 		temp.append(url)
                 tmp_t=tuple(temp)
                 topics['influencers'].append(tmp_t)
             top_list.append(topics)
-        #result=self.client.author_search_by_id("",[a])
-        #final=dict(topics=top_list, name=result.entity[0].title)
-        final=dict(topics=top_list, name=str(a))
+        result=self.client.group_search_by_id("",[a])
+        final=dict(topics=top_list, name=result.entity[0].title)
+        #final=dict(topics=top_list, name=str(a))
         return final
 
 class asker_t_p():
@@ -177,7 +172,7 @@ class asker_table_p():
             influenced_by[top_id].sort(key=lambda x:x.score,reverse=True)
             num_1=min(5,num_influence[top_id])
             num_2=min(5,num_influenced_by[top_id])
-            num[i]=num_1+num_2
+            num[i]=num_1+num_2+1
             table={}
             table['nodes']=[]
             table['links']=[]
@@ -185,12 +180,13 @@ class asker_table_p():
                 peo[i][j]=influence[top_id][j].id
             for j in range(0,num_2):
                 peo[i][j+num_1]=influenced_by[top_id][j].id
+            peo[i][num[i]-1]=a
             for j in range(0,num[i]):
                 tmp={}
                 tmp_id=peo[i][j]
-                #result=self.client.author_search_by_id("",[tmp_id])
-                #tmp['name']=result.entity[0].title
-                tmp['name']=str(tmp_id)
+                result=self.client.group_search_by_id("",[tmp_id])
+                tmp['name']=result.entity[0].title
+                #tmp['name']=str(tmp_id)
                 tmp['group']=2
                 table['nodes'].append(tmp)
             for j in range(0,num[i]):
@@ -214,7 +210,7 @@ class asker_table_p():
         return table_list
     
 #from saeclient import *
-#client = SAEClient("tcp://10.1.1.111:40114")
-#p=asker_p(client)
+#client = SAEClient("tcp://10.1.1.111:40115")
+#p=asker_table_p(client)
 #p.ask(450650)
 #print p.ask(450650)
