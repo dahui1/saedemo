@@ -56,7 +56,7 @@ class SAEClient(object):
         return er
 
     def author_search_by_id(self, dataset, aids):
-        return _entity_detail_search("AuthorSearchById", aids);
+        return self._entity_detail_search("AuthorSearchById", aids)
 
     def author_search(self, dataset, query, offset=0, count=20):
         return self._entity_search("AuthorSearch", query, offset, count)
@@ -92,7 +92,7 @@ class SAEClient(object):
         return self._entity_search("GroupSearch", query, offset, count)
 
     def group_search_by_id(self, dataset, gids):
-        return self._entity_detail_search("GroupSearchById", gids);
+        return self._entity_detail_search("GroupSearchById", gids)
 
     def inventor_search(self, dataset, query, offset=0, count=20):
         return self._entity_search("InventorSearch", query, offset, count)
