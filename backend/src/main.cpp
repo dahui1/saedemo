@@ -38,6 +38,7 @@ void setup_services(RpcServer* server) {
     server->addMethod("AuthorSearch", b(&SearchService::AuthorSearch));
     server->addMethod("AuthorSearchById", b(&SearchService::AuthorSearchById));
     server->addMethod("InfluenceSearchByAuthor", b(&SearchService::InfluenceSearchByAuthor));
+	server->addMethod("JConfSearch", b(&SearchService::JConfSearch));
 
     //pminer services
     server->addMethod("PatentSearch", b(&SearchService::PatentSearch));

@@ -110,6 +110,27 @@ bool SearchService::AuthorSearch(const string& input, string& output) {
     return response.SerializeToString(&output);
 }
 
+bool SearchService::JConfSearch(const string& input, string& output) {
+    EntitySearchRequest request;
+    request.ParseFromString(input);
+    string query = request.query();
+    int offset = request.has_offset() ? request.offset() : 0;
+    int count = request.has_count() ? request.count() : 50;
+
+    auto result = JConfSearcher(*aminer).search(query);
+    EntitySearchResponse response;
+    response.set_total_count(result.size());
+    response.set_query(query);
+    for (int ri = offset; ri < result.size() && ri - offset < count; ri++) {
+        auto i = result[ri];
+        DetailedEntity *de = response.add_entity();
+        auto p = aminer->get<JConf>(i.docId);
+        de->set_id(i.docId);
+        de->set_title(p.name);
+    }
+    return response.SerializeToString(&output);
+}
+
 // TODO merge into PubSearch
 bool SearchService::PubSearchByAuthor(const string& input, string& output) {
     EntitySearchRequest request;
@@ -254,8 +275,6 @@ bool SearchService::PatentSearchByGroup(const string& input, string& output) {
 
     return response.SerializeToString(&output);
 }
-
-
 
 bool SearchService::PatentSearchByInventor(const string& input, string& output) {
     EntitySearchRequest request;
@@ -454,15 +473,9 @@ bool SearchService::WeiboSearch(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
     string query = request.query();
-    int offset, count;
-    if (request.has_offset())
-        offset = request.offset();
-    else
-        offset = 0;
-    if (request.has_count())
-        count = request.count();
-    else
-        count = 50;
+    
+    int offset = request.has_offset() ? request.offset() : 0;
+    int count = request.has_count() ? request.count() : 50;
     auto result = weibo->search_weibos(query);
 
     if (result.size() > 5000)
@@ -493,15 +506,8 @@ bool SearchService::UserSearch(const string& input, string& output) {
     request.ParseFromString(input);
     string query = request.query();
 
-    int offset, count;
-    if (request.has_offset())
-        offset = request.offset();
-    else
-        offset = 0;
-    if (request.has_count())
-        count = request.count();
-    else
-        count = 50;
+    int offset = request.has_offset() ? request.offset() : 0;
+    int count = request.has_count() ? request.count() : 50;
 
     auto result = UserSearcher(*weibo).search(query);
     EntitySearchResponse response;

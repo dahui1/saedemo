@@ -12,6 +12,7 @@ struct SearchService {
     bool AuthorSearch(const std::string&, std::string&);
     bool AuthorSearchById(const string& input, string& output);
     bool InfluenceSearchByAuthor(const string& input, string& output);
+	bool JConfSearch(const string& input, string& output);
 
     //pminer services
     bool PatentSearch(const std::string&, std::string&);

@@ -101,3 +101,26 @@ protected:
         return score;
     }
 };
+
+struct JConfSearcher : public SupportDocSearcher<AMinerData> {
+    JConfSearcher(AMinerData& aminer) : SupportDocSearcher(aminer, "JConf", 5000) {
+    }
+    ~JConfSearcher() {
+    }
+    
+protected:
+    virtual std::vector<sae::io::vid_t> get_targets(indexing::QueryItem support) {
+        std::vector<sae::io::vid_t> targets;
+
+        auto vi = data.g->Vertices();
+        vi->MoveTo(support.docId);
+        for (auto eit = vi->OutEdges(); eit->Alive(); eit->Next()) {
+            if (eit->TypeName() == "Appear") {
+                int gid = eit->TargetId();
+                targets.push_back(gid);
+            }
+        }
+
+        return targets;
+    }
+};

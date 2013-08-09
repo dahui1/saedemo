@@ -110,7 +110,7 @@ AMinerData::~AMinerData() {
 }
 
 SearchResult AMinerData::search(const string& type, const string& query, int limit) const {
-    if (type == "Publication") {
+    if (type == "Publication" || type == "JConf") {
         return search_publications(query, limit);
     }
     LOG(ERROR) << "Search type not supported!";
