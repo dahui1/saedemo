@@ -123,6 +123,7 @@ def search():
                     dict(
                         text=pub.title,
                         link=r'http://patft1.uspto.gov/netacgi/nph-Parser?Sect1=PTO1&Sect2=HITOFF&d=PALL&p=1&u=/netahtml/PTO/srchnum.htm&r=1&f=G&l=50&s1=%22+7627620+%22.PN.&OS=PN/%22+7627620+%22&RS=PN/%22+7627620'.replace('7627620', pub.url)
+
                     ) for pub in pub_result.entity
                 ]
             ),
@@ -163,7 +164,8 @@ def search():
                 items=[
                     dict(
                         text=pub.title,
-                        link="http://weibo.com/u/%s" % pub.original_id
+                        link="",
+                        authors=client.user_search_by_id("", list(pub.related_entity[0].id)).entity if len(pub.related_entity) else []
                     ) for pub in pub_result.entity
                 ]
             ),

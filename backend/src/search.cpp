@@ -496,6 +496,15 @@ bool SearchService::WeiboSearch(const string& input, string& output) {
         stat->set_type("Comments");
         stat->set_value(p.comments_count);
         de->set_description(p.created_at);
+
+        auto re = de->add_related_entity();
+        re->set_type("Author");
+        auto vi = weibo->g->Vertices();
+        for (auto ei = vi->InEdges(); ei->Alive(); ei->Next()) {
+            if (ei->TypeName() == "UserWeibo") {
+                re->add_id(ei->SourceId());
+            }
+        }
     }
     return response.SerializeToString(&output);
 }

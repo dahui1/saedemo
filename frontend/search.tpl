@@ -131,7 +131,11 @@
 			%for item in extra_results['items']:
 				<li class="extra-item">
 				<div>
-				<a class="extra-item-title" href="{{item['link']}}">{{item['text']}}</a>
+				%if item['link']:
+					<a class="extra-item-title" href="{{item['link']}}">{{item['text']}}</a>
+				%else:
+					<span class="extra-item-title">{{item['text']}}</span>
+				%end
 				</div>
 				%if 'authors' in item:
 					<div class="extra-item-authors">{{', '.join([a.title for a in item['authors'][:3]])}}</div>
