@@ -114,7 +114,7 @@ def search():
                 items=[
                     dict(
                         text=pub.title,
-                        link="http://pminer.org/patent.do?m=viewPatent&id=%s" % pub.original_id
+                        link=r'http://patft1.uspto.gov/netacgi/nph-Parser?Sect1=PTO1&Sect2=HITOFF&d=PALL&p=1&u=/netahtml/PTO/srchnum.htm&r=1&f=G&l=50&s1=%22+7627620+%22.PN.&OS=PN/%22+7627620+%22&RS=PN/%22+7627620'.replace('7627620', pub.url)
                     ) for pub in pub_result.entity
                 ]
             ),

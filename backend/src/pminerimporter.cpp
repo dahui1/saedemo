@@ -93,6 +93,7 @@ int main() {
         // ignore empty inventors
         if (inputs[3].size() == 0) continue;
         int id = convert_to_int(inputs[0]);
+        int pn = stoi(inputs[1]);
         string title = inputs[2];
         auto inventors = split(inputs[3].substr(1, inputs[2].size() - 1), '#');
         int year = stoi(inputs[4].substr(0, 4));
@@ -101,7 +102,7 @@ int main() {
             inventor_map[*it].push_back(id);
         }
 
-        Patent patent{id, title, year, inventors};
+        Patent patent{id, pn, title, year, inventors};
         builder.AddVertex(PATENT_BASE + id, patent, "Patent");
     }
     patent_file.close();

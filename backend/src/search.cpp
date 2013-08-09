@@ -235,6 +235,7 @@ bool SearchService::PatentSearchByGroup(const string& input, string& output) {
             auto pat = parse<Patent>(vi->Data());
             DetailedEntity *de = response.add_entity();
             de->set_id(eit->TargetId());
+            de->set_url(to_string(pat.pn));
             de->set_title(pat.title);
             auto stat = de->add_stat();
             stat->set_type("year");
@@ -275,6 +276,7 @@ bool SearchService::PatentSearchByInventor(const string& input, string& output) 
             auto pat = parse<Patent>(vi->Data());
             DetailedEntity *de = response.add_entity();
             de->set_id(eit->TargetId());
+            de->set_url(to_string(pat.pn));
             de->set_title(pat.title);
             auto stat = de->add_stat();
             stat->set_type("year");
@@ -318,6 +320,7 @@ bool SearchService::PatentSearch(const string& input, string& output) {
         DetailedEntity *de = response.add_entity();
         auto p = pminer->get<Patent>(i.docId);
         de->set_id(i.docId);
+        de->set_url(to_string(p.pn));
         de->set_title(p.title);
         de->set_original_id(p.id);
         auto stat = de->add_stat();

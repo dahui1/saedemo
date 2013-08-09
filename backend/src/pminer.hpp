@@ -7,6 +7,7 @@ using namespace std;
 
 struct Patent {
     int id;
+    int pn;
     string title;
     int year;
     vector<string> inventors;
@@ -56,14 +57,14 @@ namespace sae {
             template <>
             struct serialize_impl<sae::serialization::OSerializeStream, Patent> {
                 static void run(sae::serialization::OSerializeStream& ostr, Patent& p) {
-                    ostr << p.id << p.title << p.year << p.inventors;
+                    ostr << p.id << p.pn << p.title << p.year << p.inventors;
                 }
             };
 
             template <>
             struct deserialize_impl<sae::serialization::ISerializeStream, Patent> {
                 static void run(sae::serialization::ISerializeStream& istr, Patent& p) {
-                    istr >> p.id >> p.title >> p.year >> p.inventors;
+                    istr >> p.id >> p.pn >> p.title >> p.year >> p.inventors;
                 }
             };
         }
