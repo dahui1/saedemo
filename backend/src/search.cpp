@@ -242,7 +242,6 @@ bool SearchService::PatentSearchByGroup(const string& input, string& output) {
             stat->set_value(pat.year);
             if (pat.inventors.size() > 0) {
                 string inventors = pat.inventors[0];
-                cout << pat.inventors[0] << endl;
                 for (int i = 1; i < pat.inventors.size(); i++)
                     inventors += ", " + pat.inventors[i];
                 de->set_description(inventors);

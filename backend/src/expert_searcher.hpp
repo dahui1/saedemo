@@ -18,7 +18,6 @@ struct ExpertSearcher : public SupportDocSearcher<AMinerData> {
         //check if the query is a name
         string lowerquery = query;
         std::transform(lowerquery.begin(), lowerquery.end(), lowerquery.begin(), ::tolower);
-        cout << lowerquery << endl;
         auto name = data.name2id.find(lowerquery);
         if (name != data.name2id.end()) {
             auto list = name->second;
