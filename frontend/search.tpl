@@ -36,6 +36,31 @@
 		border: solid 1px rgba(99, 99, 99, 0.18);
 	}
 
+	.extra-results {
+		line-height: 14px;
+	}
+
+	.extra-item {
+		padding: 4px 2px 4px 6px;
+		border-bottom: 1px dashed #f6f6f6;
+	}
+
+	.extra-item-title {
+		color: black;
+		font-size: 12px;
+	}
+
+	.extra-item-authors {
+		color: green;
+		font-size: 12px;
+	}
+
+	.extra-item-stats {
+		line-height: 14px;
+		height: 12px;
+		color: grey;
+	}
+
 </style>
 
 <form class="search form-search" method="get">
@@ -82,7 +107,7 @@
 				</div>
 				<ul class="item-stats inline">
 				%for k, v in item['stats'].items():
-					<li>{{k}}: <b><i>{{v}}</i></b></li>
+					<li>{{k.lower()}}: <b><i>{{v}}</i></b></li>
 				%end
 				</ul>
 				<p class='item-description'>{{item['description']}}</p>
@@ -102,9 +127,26 @@
 		<div class="extra-results">
 			<section>
 			<h4>{{extra_results['title']}}</h4>
-			<ul>
+			<ul class="unstyled">
 			%for item in extra_results['items']:
-				<li><a href="{{item['link']}}">{{item['text']}}</a></li>
+				<li class="extra-item">
+				<div>
+				<a class="extra-item-title" href="{{item['link']}}">{{item['text']}}</a>
+				</div>
+				%if 'authors' in item:
+					<div class="extra-item-authors">{{', '.join([a.title for a in item['authors'][:3]])}}</div>
+				%end
+				<div class="extra-item-stats">
+					%stats = item.get('stats', {})
+					%if 'citation' in stats:
+					<div class="extra-item-citation pull-right">citations:{{stats['citation']}}</div>
+					%end
+					%if 'year' in stats:
+					<div class="extra-item-year">{{stats['year']}}</div>
+					%end
+				</div>
+				<div class="clearfix"></div>
+				</li>
 			%end
 			</ul>
 			</section>

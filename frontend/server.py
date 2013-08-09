@@ -75,7 +75,11 @@ def search():
                 items=[
                     dict(
                         text=pub.title,
-                        link="http://arnetminer.org/publication/-%s.html" % pub.original_id
+                        link="http://arnetminer.org/publication/-%s.html" % pub.original_id,
+                        stats=dict(
+                            (s.type, s.value) for s in pub.stat
+                        ),
+                        authors=client.author_search_by_id("", list(pub.related_entity[0].id)).entity
                     ) for pub in pub_result.entity
                 ]
             ),
