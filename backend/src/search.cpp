@@ -616,7 +616,7 @@ bool SearchServiceImpl::InfluenceSearchByUser(const string& input, string& outpu
 
     auto vit = weibo->g->Vertices();
     vit->MoveTo(uid);
-    for (auto eit = vit->OutEdges(); eit->Alive(); eit->Next()) {
+    for (auto eit = vit->InEdges(); eit->Alive(); eit->Next()) {
         if (eit->TypeName() == "UserInfluence") {
             auto ui = parse<UserInfluence>(eit->Data());
             Influence *inf = response.add_influence();
@@ -625,7 +625,7 @@ bool SearchServiceImpl::InfluenceSearchByUser(const string& input, string& outpu
             inf->set_score(ui.weight);
         }
     }
-    for (auto eit = vit->InEdges(); eit->Alive(); eit->Next()) {
+    for (auto eit = vit->OutEdges(); eit->Alive(); eit->Next()) {
         if (eit->TypeName() == "UserInfluence") {
             auto ui = parse<UserInfluence>(eit->Data());
             Influence *inf = response.add_influenced_by();

@@ -16,9 +16,9 @@
 </div>
 
 <div>Patent:
-<span><a href="search?q=search">search</a></span>
-<span><a href="search?q=mobile%20phone">mobile phone</a></span>
-<form class="form-inline" action="academic/search">
+<span><a href="patent/search?q=search">search</a></span>
+<span><a href="patent/search?q=mobile%20phone">mobile phone</a></span>
+<form class="form-inline" action="patent/search">
 <input name="q" />
 <button type="submit">search</button>
 </form>
@@ -27,7 +27,7 @@
 <div>Weibo:
 <span><a href="weibo/search?q=社会网络">社会网络(social network)</a></span>
 <span><a href="weibo/search?q=地震">地震(earthquake)</a></span>
-<form class="form-inline" action="academic/search">
+<form class="form-inline" action="weibo/search">
 <input name="q" />
 <button type="submit">search</button>
 </form>

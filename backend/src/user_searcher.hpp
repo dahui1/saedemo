@@ -35,7 +35,7 @@ protected:
         for (const indexing::QueryItem& item : user_wbs.second)
         {
             auto wb = data.get<Weibo>(item.docId);
-            score += item.score * (wb.reposts_count + wb.comments_count);
+            score += item.score;
         }
 
         return score;

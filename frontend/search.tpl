@@ -76,7 +76,8 @@
 
 %if defined("hotqueries"):
 	<p>Hot queries:
-	%for query in hotqueries:
+	%for i, query in enumerate(hotqueries):
+	{{',' if i > 0 else ''}}
 	<span><a href="search?q={{query}}">{{query}}</a></span>
 	%end
 %end

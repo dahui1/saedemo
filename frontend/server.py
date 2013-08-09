@@ -16,7 +16,7 @@ import time
 import json
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-client = SAEClient("tcp://127.0.0.1:40114")
+client = SAEClient("tcp://127.0.0.1:40116")
 
 knowledge_drift_clients = {}
 def get_knowledge_drift_client(dataset):
@@ -50,7 +50,7 @@ def search():
     return dict(
         query=q,
         encoded_query=urlencode({"q": result.query.encode('utf8')}),
-        hotqueries=["data mining", "machine learning"],
+        hotqueries=["data mining", "deep learning"],
         count=result.total_count,
         trends_enabled=True,
         influence_enabled=True,
@@ -142,7 +142,7 @@ def search():
     return dict(
         query=q,
         encoded_query=urlencode({"q": result.query.encode('utf8')}),
-        hotqueries=[u"苹果", u"高考", u"网络"],
+        hotqueries=[u"高考", u"网络", u"星座", u"天气"],
         count=result.total_count,
         results_title='Users',
         results=[
