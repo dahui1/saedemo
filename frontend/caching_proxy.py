@@ -16,7 +16,7 @@ def cache_name(filename):
     alpha_only = ''.join([c if c in alphabets else '_' for c in filename])
     m = hashlib.md5()
     m.update(filename)
-    return alpha_only + m.hexdigest()
+    return alpha_only + '___' + m.hexdigest()
 
 class CacheHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET(self):
