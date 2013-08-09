@@ -301,6 +301,11 @@ var svg = d3.select(".topic-analysis.index" + index + " .table").append("svg")//
   $(window).resize(function() {
     //drawPie();
     drawChart();
+    $('.entity-img').one('load', function() {
+      $('.entity-img').css('top', $('.entity-img').parent().parent().innerHeight() / 2 - $('.entity-img').outerHeight() / 2);
+    }).one('error', function() {
+      $(this).attr('src', 'http://static02.linkedin.com/scds/common/u/img/icon/icon_no_company_logo_100x60.png');
+    });
   }).trigger('resize');
   $('.topics').load('influence/topics/latest', function() {
     $('.topic-list li:nth(0)').click();

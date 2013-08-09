@@ -247,13 +247,18 @@ def influence(uid):
     influence_index=dict(
         name=result.entity[0].title,
         imgurl=result.entity[0].imgurl
-)
+    )
     return influence_index
 
 @route('/patent/<uid:int>/influence')
 @view('influence')
 def influence(uid):
-    return sample_data.influence_index
+    result=client.group_search_by_id("",[uid])
+    influence_index=dict(
+        name=result.entity[0].title,
+        imgurl=result.entity[0].imgurl
+    )
+    return influence_index
 
 @route('/static/<path:path>')
 def static(path):

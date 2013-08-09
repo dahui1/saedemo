@@ -1,4 +1,13 @@
 <style type="text/css">
+    .hero-unit {
+	line-height: 1;
+    }
+    .entity-img-wrapper {
+	position: relative;
+    }
+    .entity-img {
+	position: absolute;
+    }
     .influence-graph {
         font: 10px sans-serif;
     }
@@ -108,9 +117,8 @@ width: auto;
 <div class="hero-unit">
     <h2>Influence graph of <b>{{name}}</b></h2>
     <div class="row-fluid">
-        <div class="span2">
-            <img src="{{imgurl}}" alt="{{name}}" style="width: 100%; height: auto;"/>
-            <p>{{name}}
+        <div class="span2 entity-img-wrapper">
+            <img class="entity-img" src="{{imgurl}}" alt="{{name}}" style="width: 100%; height: auto;"/>
         </div>
         <div class="span7">
             <div class="influence-graph" style="height: 200px; width: 100%;"></div>
