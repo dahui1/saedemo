@@ -142,7 +142,7 @@
 				%end
 				<div class="extra-item-stats">
 					%stats = item.get('stats', {})
-					%if 'citation' in stats:
+					%if stats.get('citation', -1) > 0:
 					<div class="extra-item-citation pull-right">citations:{{stats['citation']}}</div>
 					%end
 					%if 'year' in stats:
