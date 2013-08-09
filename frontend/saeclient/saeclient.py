@@ -1,8 +1,10 @@
 #!env python2
 
+from collections import defaultdict
 import rpc_pb2
 import interface_pb2
 import zmq
+import threading
 
 context = zmq.Context()
 
@@ -31,6 +33,9 @@ def pbrequest(server, method, params):
 class SAEClient(object):
     def __init__(self, endpoint):
         self.endpoint = endpoint
+        # entity_cache = method : { id : entity }
+        self.entity_cache = defaultdict(dict)
+        self.entity_cache_lock = threading.Lock()
 
     def echo_test(self, s):
         return request(self.endpoint, "echo_test", s)
@@ -47,12 +52,23 @@ class SAEClient(object):
         return er
 
     def _entity_detail_search(self, method, ids):
+        self.entity_cache_lock.acquire()
         r = interface_pb2.EntityDetailRequest()
-        r.dataset = ""
-        r.id.extend(ids)
-        response = pbrequest(self.endpoint, method, r)
         er = interface_pb2.EntitySearchResponse()
-        er.ParseFromString(response)
+        r.dataset = ""
+        cached = []
+        for id in ids:
+            if id not in self.entity_cache[method]:
+                r.id.append(id)
+            else:
+                cached.append(id)
+        if len(r.id):
+            response = pbrequest(self.endpoint, method, r)
+            er.ParseFromString(response)
+        for e in er.entity:
+            self.entity_cache[method][e.id] = e
+        er.entity.extend([self.entity_cache[method][id] for id in cached])
+        self.entity_cache_lock.release()
         return er
 
     def author_search_by_id(self, dataset, aids):
