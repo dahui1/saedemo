@@ -123,10 +123,7 @@ class asker_t():
                 tmp['value']=num[i]
                 tmp['pap1']=pub[i][0].title
 		result=self.client.author_search_by_id("",pub[i][0].related_entity[0].id)
-		author=result.entity[0].title
-		for j in range(1,result.total_count):
-		    author+=result.entity[j].title
-		    author+=', '
+		author = ', '.join([e.title for e in result.entity])
                 tmp['au1']=author
                 tmp['cit1']=pub[i][0].stat[2].value
 		tmp['pap2']=0

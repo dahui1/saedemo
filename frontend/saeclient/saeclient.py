@@ -69,6 +69,8 @@ class SAEClient(object):
             self.entity_cache[method][e.id] = e
         er.entity.extend([self.entity_cache[method][id] for id in cached])
         self.entity_cache_lock.release()
+        if er.total_count < len(er.entity):
+            er.total_count = len(er.entity)
         return er
 
     def author_search_by_id(self, dataset, aids):
