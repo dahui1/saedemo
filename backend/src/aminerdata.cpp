@@ -58,10 +58,10 @@ AMinerData::AMinerData(char const * prefix) {
             string name = a.names[0];
             int hindex = a.h_index;
             id2name[id] = make_pair (name, hindex);
+            std::transform(name.begin(), name.end(), name.begin(), ::tolower);
             auto f = name2id.find(name);
             if (f == name2id.end()) {
                 vector<pair<int,int>> names;
-                std::transform(name.begin(), name.end(), name.begin(), ::tolower);
                 names.push_back(make_pair (id, hindex));
                 name2id[name] = names;
             }
