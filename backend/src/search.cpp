@@ -541,6 +541,7 @@ bool SearchService::InfluenceSearchByUser(const string& input, string& output) {
             auto ui = parse<UserInfluence>(eit->Data());
             Influence *inf = response.add_influence();
             inf->set_id(eit->TargetId());
+            inf->set_topic(-1);
             inf->set_score(ui.weight);
         }
     }
@@ -549,6 +550,7 @@ bool SearchService::InfluenceSearchByUser(const string& input, string& output) {
             auto ui = parse<UserInfluence>(eit->Data());
             Influence *inf = response.add_influenced_by();
             inf->set_id(eit->SourceId());
+            inf->set_topic(-1);
             inf->set_score(ui.weight);
         }
     }
