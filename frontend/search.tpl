@@ -43,7 +43,9 @@
 		<legend>Entity Search</legend>
 		<input type="text" class="search-query" name="q" placeholder="type in a topic, e.g. data mining" value="{{query}}"/>
 		<button class="btn btn-primary" type="submit">Search</button>
-		<button class="btn btn-analysis">Knowledge Drifting</button>
+		%if get("trends_enabled", False):
+			<button class="btn btn-analysis">Topic Trend</button>
+		%end
 	</fieldset>
 </form>
 
@@ -74,7 +76,9 @@
 						<span>[<a href="{{v['url']}}">{{k}}</a>]</span>
 						%end
 					%end
-					<span class="pull-right">[<a href="{{item['id']}}/influence">Influence Analysis</a>]</span>
+					%if get('influence_enabled', False):
+						<span class="pull-right">[<a href="{{item['id']}}/influence">Influence Analysis</a>]</span>
+					%end
 				</div>
 				<ul class="item-stats inline">
 				%for k, v in item['stats'].items():

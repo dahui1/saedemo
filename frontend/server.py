@@ -52,6 +52,8 @@ def search():
         encoded_query=urlencode({"q": result.query.encode('utf8')}),
         hotqueries=["data mining", "machine learning"],
         count=result.total_count,
+        trends_enabled=True,
+        influence_enabled=True,
         results_title='Experts',
         results=[
             dict(
@@ -92,8 +94,10 @@ def search():
     return dict(
         query=q,
         encoded_query=urlencode({"q": result.query.encode('utf8')}),
-        hotqueries=["data mining", "oil refine", "search engine"],
+        hotqueries=["data mining", "search engine", "mobile phone"],
         count=result.total_count,
+        trends_enabled=True,
+        influence_enabled=True,
         results_title='Companies',
         results=[
             dict(
@@ -133,7 +137,7 @@ def search():
     return dict(
         query=q,
         encoded_query=urlencode({"q": result.query.encode('utf8')}),
-        hotqueries=[u"苹果", u"地震"],
+        hotqueries=[u"苹果", u"高考", u"网络"],
         count=result.total_count,
         results_title='Users',
         results=[
