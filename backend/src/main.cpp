@@ -17,7 +17,12 @@ DEFINE_string(weibo, "weibo", "graph prefix of weibo");
 using namespace std;
 using namespace sae::rpc;
 
-void setup_services(RpcServer* server) {
+int main(int argc, char** argv) {
+    gflags::ParseCommandLineFlags(&argc, &argv, true);
+
+    LOG(INFO) << "Demo Server Starting...";
+    RpcServer* server = RpcServer::CreateServer(FLAGS_port, FLAGS_threads);
+
     LOG(INFO) << "Loading aminer data...";
     auto aminer = unique_ptr<AMinerData>(new AMinerData(FLAGS_aminer.c_str()));
     LOG(INFO) << "Loading pminer data...";
@@ -25,48 +30,9 @@ void setup_services(RpcServer* server) {
     LOG(INFO) << "Loading weibo data...";
     auto weibo = unique_ptr<WeiboData>(new WeiboData(FLAGS_weibo.c_str()));
 
-    LOG(INFO) << "Making aminer, pminer and weibo services...";
-    // Note that this object have to be allocated on heap
-    auto service = new SearchService(std::move(aminer), std::move(pminer), std::move(weibo));
-
-    LOG(INFO) << "Binding aminer and pminer services...";
-    auto b = make_binder(*service);
-
-    //aminer services
-    server->addMethod("PubSearch", b(&SearchService::PubSearch));
-    server->addMethod("PubSearchByAuthor", b(&SearchService::PubSearchByAuthor));
-    server->addMethod("AuthorSearch", b(&SearchService::AuthorSearch));
-    server->addMethod("AuthorSearchById", b(&SearchService::AuthorSearchById));
-    server->addMethod("InfluenceSearchByAuthor", b(&SearchService::InfluenceSearchByAuthor));
-	server->addMethod("JConfSearch", b(&SearchService::JConfSearch));
-
-    //pminer services
-    server->addMethod("PatentSearch", b(&SearchService::PatentSearch));
-    server->addMethod("PatentSearchByGroup", b(&SearchService::PatentSearchByGroup));
-    server->addMethod("PatentSearchByInventor", b(&SearchService::PatentSearchByInventor));
-    server->addMethod("GroupSearch", b(&SearchService::GroupSearch));
-    server->addMethod("GroupSearchById", b(&SearchService::GroupSearchById));
-    server->addMethod("InventorSearch", b(&SearchService::InventorSearch));
-    server->addMethod("InfluenceSearchByGroup", b(&SearchService::InfluenceSearchByGroup));
-
-    //weibo services
-    server->addMethod("UserSearch", b(&SearchService::UserSearch));
-    server->addMethod("UserSearchById", b(&SearchService::UserSearchById));
-    server->addMethod("WeiboSearch", b(&SearchService::WeiboSearch));
-    server->addMethod("WeiboSearchByUser", b(&SearchService::WeiboSearchByUser));
-    server->addMethod("InfluenceSearchByUser", b(&SearchService::InfluenceSearchByUser));
-
-    LOG(INFO) << "Services have been set up.";
-}
-
-int main(int argc, char** argv) {
-    gflags::ParseCommandLineFlags(&argc, &argv, true);
-
-    LOG(INFO) << "Demo Server Starting...";
-    RpcServer* server = RpcServer::CreateServer(FLAGS_port, FLAGS_threads);
-
     LOG(INFO) << "Setting up services...";
-    setup_services(server);
+    SearchService* service = SearchService::CreateService(std::move(aminer), std::move(pminer), std::move(weibo));
+    service->attachTo(server);
 
     LOG(INFO) << "Trying to bringing our services up...";
     server->run();

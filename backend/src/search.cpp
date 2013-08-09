@@ -15,6 +15,71 @@ using namespace indexing;
 using namespace std::chrono;
 using namespace sae::io;
 
+struct SearchServiceImpl : public SearchService {
+    SearchServiceImpl(std::unique_ptr<AMinerData>&& adata, std::unique_ptr<PMinerData>&& pdata, std::unique_ptr<WeiboData>&& wdata);
+    ~SearchServiceImpl() {}
+
+    //aminer services
+    bool PubSearch(const std::string&, std::string&);
+    bool PubSearchByAuthor(const std::string&, std::string&);
+    bool AuthorSearch(const std::string&, std::string&);
+    bool AuthorSearchById(const string& input, string& output);
+    bool InfluenceSearchByAuthor(const string& input, string& output);
+    bool JConfSearch(const string& input, string& output);
+
+    //pminer services
+    bool PatentSearch(const std::string&, std::string&);
+    bool PatentSearchByInventor(const std::string&, std::string&);
+    bool PatentSearchByGroup(const std::string&, std::string&);
+    bool GroupSearch(const std::string&, std::string&);
+    bool GroupSearchById(const std::string&, std::string&);
+    bool InventorSearch(const std::string&, std::string&);
+    bool InfluenceSearchByGroup(const string& input, string& output);
+
+    //weibo services
+    bool WeiboSearch(const std::string&, std::string&);
+    bool UserSearch(const std::string&, std::string&);
+    bool WeiboSearchByUser(const string& input, string& output);
+    bool InfluenceSearchByUser(const string& input, string& output);
+    bool UserSearchById(const string& input, string& output);
+
+    void attachTo(sae::rpc::RpcServer* server) {
+        LOG(INFO) << "Binding  services...";
+        auto b = sae::rpc::make_binder(*this);
+
+        //aminer services
+        server->addMethod("PubSearch", b(&SearchServiceImpl::PubSearch));
+        server->addMethod("PubSearchByAuthor", b(&SearchServiceImpl::PubSearchByAuthor));
+        server->addMethod("AuthorSearch", b(&SearchServiceImpl::AuthorSearch));
+        server->addMethod("AuthorSearchById", b(&SearchServiceImpl::AuthorSearchById));
+        server->addMethod("InfluenceSearchByAuthor", b(&SearchServiceImpl::InfluenceSearchByAuthor));
+        server->addMethod("JConfSearch", b(&SearchServiceImpl::JConfSearch));
+
+        //pminer services
+        server->addMethod("PatentSearch", b(&SearchServiceImpl::PatentSearch));
+        server->addMethod("PatentSearchByGroup", b(&SearchServiceImpl::PatentSearchByGroup));
+        server->addMethod("PatentSearchByInventor", b(&SearchServiceImpl::PatentSearchByInventor));
+        server->addMethod("GroupSearch", b(&SearchServiceImpl::GroupSearch));
+        server->addMethod("GroupSearchById", b(&SearchServiceImpl::GroupSearchById));
+        server->addMethod("InventorSearch", b(&SearchServiceImpl::InventorSearch));
+        server->addMethod("InfluenceSearchByGroup", b(&SearchServiceImpl::InfluenceSearchByGroup));
+
+        //weibo services
+        server->addMethod("UserSearch", b(&SearchServiceImpl::UserSearch));
+        server->addMethod("UserSearchById", b(&SearchServiceImpl::UserSearchById));
+        server->addMethod("WeiboSearch", b(&SearchServiceImpl::WeiboSearch));
+        server->addMethod("WeiboSearchByUser", b(&SearchServiceImpl::WeiboSearchByUser));
+        server->addMethod("InfluenceSearchByUser", b(&SearchServiceImpl::InfluenceSearchByUser));
+
+        LOG(INFO) << "Services have been set up.";
+    };
+
+private:
+    std::unique_ptr<AMinerData> aminer;
+    std::unique_ptr<PMinerData> pminer;
+    std::unique_ptr<WeiboData> weibo;
+};
+
 namespace {
     string join(const string& sep, const vector<string>& values) {
         std::stringstream ss;
@@ -61,11 +126,11 @@ namespace {
     }
 }
 
-SearchService::SearchService(std::unique_ptr<AMinerData>&& adata, std::unique_ptr<PMinerData>&& pdata, std::unique_ptr<WeiboData>&& wdata)
+SearchServiceImpl::SearchServiceImpl(std::unique_ptr<AMinerData>&& adata, std::unique_ptr<PMinerData>&& pdata, std::unique_ptr<WeiboData>&& wdata)
     : aminer(std::move(adata)), pminer(std::move(pdata)), weibo(std::move(wdata)) {
 }
 
-bool SearchService::AuthorSearchById(const string& input, string& output) {
+bool SearchServiceImpl::AuthorSearchById(const string& input, string& output) {
     EntityDetailRequest request;
     request.ParseFromString(input);
 
@@ -89,7 +154,7 @@ bool SearchService::AuthorSearchById(const string& input, string& output) {
     return response.SerializeToString(&output);
 }
 
-bool SearchService::AuthorSearch(const string& input, string& output) {
+bool SearchServiceImpl::AuthorSearch(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
     string query = request.query();
@@ -110,7 +175,7 @@ bool SearchService::AuthorSearch(const string& input, string& output) {
     return response.SerializeToString(&output);
 }
 
-bool SearchService::JConfSearch(const string& input, string& output) {
+bool SearchServiceImpl::JConfSearch(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
     string query = request.query();
@@ -132,7 +197,7 @@ bool SearchService::JConfSearch(const string& input, string& output) {
 }
 
 // TODO merge into PubSearch
-bool SearchService::PubSearchByAuthor(const string& input, string& output) {
+bool SearchServiceImpl::PubSearchByAuthor(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
 
@@ -169,7 +234,7 @@ bool SearchService::PubSearchByAuthor(const string& input, string& output) {
     return response.SerializeToString(&output);
 }
 
-bool SearchService::PubSearch(const string& input, string& output) {
+bool SearchServiceImpl::PubSearch(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
     string query = request.query();
@@ -205,7 +270,7 @@ bool SearchService::PubSearch(const string& input, string& output) {
     return response.SerializeToString(&output);
 }
 
-bool SearchService::InfluenceSearchByAuthor(const string& input, string& output) {
+bool SearchServiceImpl::InfluenceSearchByAuthor(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
 
@@ -238,7 +303,7 @@ bool SearchService::InfluenceSearchByAuthor(const string& input, string& output)
     return response.SerializeToString(&output);
 }
 
-bool SearchService::PatentSearchByGroup(const string& input, string& output) {
+bool SearchServiceImpl::PatentSearchByGroup(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
 
@@ -276,7 +341,7 @@ bool SearchService::PatentSearchByGroup(const string& input, string& output) {
     return response.SerializeToString(&output);
 }
 
-bool SearchService::PatentSearchByInventor(const string& input, string& output) {
+bool SearchServiceImpl::PatentSearchByInventor(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
 
@@ -317,7 +382,8 @@ bool SearchService::PatentSearchByInventor(const string& input, string& output) 
     return response.SerializeToString(&output);
 }
 
-bool SearchService::PatentSearch(const string& input, string& output) {
+bool SearchServiceImpl::PatentSearch(const string& input, string& output) {
+
     EntitySearchRequest request;
     request.ParseFromString(input);
     string query = request.query();
@@ -358,7 +424,7 @@ bool SearchService::PatentSearch(const string& input, string& output) {
     return response.SerializeToString(&output);
 }
 
-bool SearchService::GroupSearch(const string& input, string& output) {
+bool SearchServiceImpl::GroupSearch(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
     string query = request.query();
@@ -385,7 +451,7 @@ bool SearchService::GroupSearch(const string& input, string& output) {
     return response.SerializeToString(&output);
 }
 
-bool SearchService::GroupSearchById(const string& input, string& output) {
+bool SearchServiceImpl::GroupSearchById(const string& input, string& output) {
     EntityDetailRequest request;
     request.ParseFromString(input);
 
@@ -414,7 +480,7 @@ bool SearchService::GroupSearchById(const string& input, string& output) {
     return response.SerializeToString(&output);
 }
 
-bool SearchService::InventorSearch(const string& input, string& output) {
+bool SearchServiceImpl::InventorSearch(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
     string query = request.query();
@@ -435,7 +501,7 @@ bool SearchService::InventorSearch(const string& input, string& output) {
     return response.SerializeToString(&output);
 }
 
-bool SearchService::InfluenceSearchByGroup(const string& input, string& output) {
+bool SearchServiceImpl::InfluenceSearchByGroup(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
 
@@ -469,7 +535,7 @@ bool SearchService::InfluenceSearchByGroup(const string& input, string& output) 
 }
 
 
-bool SearchService::WeiboSearch(const string& input, string& output) {
+bool SearchServiceImpl::WeiboSearch(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
     string query = request.query();
@@ -510,7 +576,7 @@ bool SearchService::WeiboSearch(const string& input, string& output) {
 }
 
 
-bool SearchService::UserSearch(const string& input, string& output) {
+bool SearchServiceImpl::UserSearch(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
     string query = request.query();
@@ -539,7 +605,7 @@ bool SearchService::UserSearch(const string& input, string& output) {
     return response.SerializeToString(&output);
 }
 
-bool SearchService::InfluenceSearchByUser(const string& input, string& output) {
+bool SearchServiceImpl::InfluenceSearchByUser(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
 
@@ -573,7 +639,7 @@ bool SearchService::InfluenceSearchByUser(const string& input, string& output) {
 }
 
 
-bool SearchService::WeiboSearchByUser(const string& input, string& output) {
+bool SearchServiceImpl::WeiboSearchByUser(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
 
@@ -608,14 +674,14 @@ bool SearchService::WeiboSearchByUser(const string& input, string& output) {
     return response.SerializeToString(&output);
 }
 
-bool SearchService::UserSearchById(const string& input, string& output) {
+bool SearchServiceImpl::UserSearchById(const string& input, string& output) {
     EntityDetailRequest request;
     request.ParseFromString(input);
 
     EntitySearchResponse response;
     string query = "";
     response.set_query(query);
-    
+
     int count = 0;
     auto vi = weibo->g->Vertices();
     for (auto& uid : request.id()) {
@@ -636,4 +702,8 @@ bool SearchService::UserSearchById(const string& input, string& output) {
     }
     response.set_total_count(count);
     return response.SerializeToString(&output);
+}
+
+SearchService* SearchService::CreateService(std::unique_ptr<AMinerData>&& adata, std::unique_ptr<PMinerData>&& pdata, std::unique_ptr<WeiboData>&& wdata) {
+    return new SearchServiceImpl(std::move(adata), std::move(pdata), std::move(wdata));
 }
