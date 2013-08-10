@@ -80,15 +80,18 @@
 
 %if defined("hotqueries"):
 	<p>Hot queries:
-	%for i, query in enumerate(hotqueries):
+	%for i, hotquery in enumerate(hotqueries):
 	{{',' if i > 0 else ''}}
-	<span><a href="search?q={{query}}">{{query}}</a></span>
+	<span><a href="search?q={{hotquery}}">{{hotquery}}</a></span>
 	%end
 %end
 
 <div class="row-fluid">
 	<div class="results span8">
-	<div class="results-summary pull-right">{{count}} results, displaying 0 - 15</div>
+	<div class="results-summary pull-right">
+		{{total_count}}+ results, displaying {{offset+1}} - {{offset+count}}
+		<a href="?q={{query}}&offset={{offset+count}}&count={{count}}">more</a>
+	</div>
 	<h4>{{get("results_title", "Results")}}</h4>
 	<ul class="unstyled">
 	%for item in results:

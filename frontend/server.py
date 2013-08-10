@@ -43,15 +43,19 @@ def index():
 @view('search')
 def search():
     q = request.query.q or ''
+    offset = int(request.query.offset or '0')
+    count = int(request.query.count or '20')
     print 'searching', q, 'in academic'
-    result = client.author_search("", q, 0, 20)
+    result = client.author_search("", q, offset, count)
     pub_result = client.pub_search("", q, 0, 20)
 
     return dict(
         query=q,
         encoded_query=urlencode({"q": result.query.encode('utf8')}),
         hotqueries=["data mining", "deep learning"],
-        count=result.total_count,
+        offset=offset,
+        count=count,
+        total_count=result.total_count,
         trends_enabled=True,
         influence_enabled=True,
         results_title='Experts',
@@ -91,15 +95,19 @@ def search():
 @view('search')
 def search():
     q = request.query.q or ''
+    offset = int(request.query.offset or '0')
+    count = int(request.query.count or '20')
     print 'searching', q, 'in patent'
-    result = client.group_search("", q, 0, 20)
+    result = client.group_search("", q, offset, count)
     pub_result = client.patent_search("", q, 0, 20)
 
     return dict(
         query=q,
         encoded_query=urlencode({"q": result.query.encode('utf8')}),
         hotqueries=["data mining", "search engine", "mobile phone"],
-        count=result.total_count,
+        offset=offset,
+        count=count,
+        total_count=result.total_count,
         trends_enabled=True,
         influence_enabled=True,
         results_title='Companies',
@@ -122,8 +130,11 @@ def search():
                 items=[
                     dict(
                         text=pub.title,
-                        link=r'http://patft1.uspto.gov/netacgi/nph-Parser?Sect1=PTO1&Sect2=HITOFF&d=PALL&p=1&u=/netahtml/PTO/srchnum.htm&r=1&f=G&l=50&s1=%22+7627620+%22.PN.&OS=PN/%22+7627620+%22&RS=PN/%22+7627620'.replace('7627620', pub.url)
-
+                        link=r'http://patft1.uspto.gov/netacgi/nph-Parser?Sect1=PTO1&Sect2=HITOFF&d=PALL&p=1&u=/netahtml/PTO/srchnum.htm&r=1&f=G&l=50&s1=%22+7627620+%22.PN.&OS=PN/%22+7627620+%22&RS=PN/%22+7627620'.replace('7627620', pub.url),
+                        stats=dict(
+                            (s.type, s.value) for s in pub.stat
+                        ),
+                        authors=client.inventor_search_by_id("", list(pub.related_entity[0].id)).entity
                     ) for pub in pub_result.entity
                 ]
             ),
@@ -135,6 +146,8 @@ def search():
 @view('search')
 def search():
     q = request.query.q or ''
+    offset = int(request.query.offset or '0')
+    count = int(request.query.count or '20')
     print 'searching', q, 'in weibo'
     result = client.user_search("", q, 0, 20)
     pub_result = client.weibo_search("", q, 0, 20)
@@ -143,7 +156,9 @@ def search():
         query=q,
         encoded_query=urlencode({"q": result.query.encode('utf8')}),
         hotqueries=[u"高考", u"网络", u"星座", u"天气"],
-        count=result.total_count,
+        offset=offset,
+        count=count,
+        total_count=result.total_count,
         results_title='Users',
         results=[
             dict(
@@ -165,7 +180,10 @@ def search():
                     dict(
                         text=pub.title,
                         link="",
-                        authors=client.user_search_by_id("", list(pub.related_entity[0].id)).entity if len(pub.related_entity) else []
+                        stats=dict(
+                            (s.type, s.value) for s in pub.stat
+                        ),
+                        user=client.user_search_by_id("", list(pub.related_entity[0].id)).entity if len(pub.related_entity) else []
                     ) for pub in pub_result.entity
                 ]
             ),
