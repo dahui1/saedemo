@@ -115,6 +115,9 @@ class SAEClient(object):
     def inventor_search(self, dataset, query, offset=0, count=20):
         return self._entity_search("InventorSearch", query, offset, count)
 
+    def inventor_search_by_id(self, dataset, iids):
+        return self._entity_detail_search("InventorSearchById", iids)
+
     def influence_search_by_group(self, dataset, gid):
         r = interface_pb2.EntitySearchRequest()
         r.dataset = dataset
@@ -123,7 +126,6 @@ class SAEClient(object):
         er = interface_pb2.InfluenceSearchResponse()
         er.ParseFromString(response)
         return er
-
 
     def user_search(self, dataset, query, offset=0, count=20):
         return self._entity_search("UserSearch", query, offset, count)
@@ -144,7 +146,7 @@ class SAEClient(object):
         response = pbrequest(self.endpoint, "InfluenceSearchByUser", r)
         er = interface_pb2.InfluenceSearchResponse()
         er.ParseFromString(response)
-        return er 
+        return er
 
 def main():
     c = SAEClient("tcp://localhost:70112")

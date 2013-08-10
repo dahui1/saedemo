@@ -27,7 +27,7 @@ protected:
 
     virtual double get_score(const std::pair<int, std::vector<indexing::QueryItem>>& gpats) {
         auto group = data.get<Group>(gpats.first);
-        return SupportDocSearcher::get_score(gpats);
+        return SupportDocSearcher::get_score(gpats) + group.patCount / 160;
     }
 };
 

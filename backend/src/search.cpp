@@ -34,6 +34,7 @@ struct SearchServiceImpl : public SearchService {
     bool GroupSearch(const std::string&, std::string&);
     bool GroupSearchById(const std::string&, std::string&);
     bool InventorSearch(const std::string&, std::string&);
+    bool InventorSearchById(const std::string&, std::string&);
     bool InfluenceSearchByGroup(const string& input, string& output);
 
     //weibo services
@@ -62,6 +63,7 @@ struct SearchServiceImpl : public SearchService {
         server->addMethod("GroupSearch", b(&SearchServiceImpl::GroupSearch));
         server->addMethod("GroupSearchById", b(&SearchServiceImpl::GroupSearchById));
         server->addMethod("InventorSearch", b(&SearchServiceImpl::InventorSearch));
+        server->addMethod("InventorSearchById", b(&SearchServiceImpl::InventorSearchById));
         server->addMethod("InfluenceSearchByGroup", b(&SearchServiceImpl::InfluenceSearchByGroup));
 
         //weibo services
@@ -95,7 +97,11 @@ namespace {
     void fill_entity_by_author(DetailedEntity* de, const Author& author) {
         de->set_title(author.names[0]);
         de->set_original_id(author.id);
-        de->set_description(author.position + ", " + author.affiliation);
+        string s = author.position;
+        if (author.affiliation.size() > 0) {
+            s += ", " + author.affiliation;
+        }
+        de->set_description(s);
         de->set_imgurl(author.imgurl);
         de->set_topics(join(",", author.topics));
         auto stat = de->add_stat();
@@ -501,6 +507,30 @@ bool SearchServiceImpl::InventorSearch(const string& input, string& output) {
     return response.SerializeToString(&output);
 }
 
+bool SearchServiceImpl::InventorSearchById(const string& input, string& output) {
+    EntityDetailRequest request;
+    request.ParseFromString(input);
+
+    EntitySearchResponse response;
+    string query = "";
+    int count = 0;
+    auto vi = pminer->g->Vertices();
+    for (auto& gid : request.id()) {
+        vi->MoveTo(gid);
+        if (vi->TypeName() == "Inventor") {
+            DetailedEntity *de = response.add_entity();
+            auto p = parse<Inventor>(vi->Data());
+            de->set_id(gid);
+            de->set_title(p.name);
+            query += to_string(gid) + "\t";
+            count ++;
+        }
+    }
+    response.set_query(query);
+    response.set_total_count(count);
+    return response.SerializeToString(&output);
+}
+
 bool SearchServiceImpl::InfluenceSearchByGroup(const string& input, string& output) {
     EntitySearchRequest request;
     request.ParseFromString(input);
@@ -566,6 +596,7 @@ bool SearchServiceImpl::WeiboSearch(const string& input, string& output) {
         auto re = de->add_related_entity();
         re->set_type("Author");
         auto vi = weibo->g->Vertices();
+        vi->MoveTo(i.docId);
         for (auto ei = vi->InEdges(); ei->Alive(); ei->Next()) {
             if (ei->TypeName() == "UserWeibo") {
                 re->add_id(ei->SourceId());
@@ -616,7 +647,7 @@ bool SearchServiceImpl::InfluenceSearchByUser(const string& input, string& outpu
 
     auto vit = weibo->g->Vertices();
     vit->MoveTo(uid);
-    for (auto eit = vit->InEdges(); eit->Alive(); eit->Next()) {
+    for (auto eit = vit->OutEdges(); eit->Alive(); eit->Next()) {
         if (eit->TypeName() == "UserInfluence") {
             auto ui = parse<UserInfluence>(eit->Data());
             Influence *inf = response.add_influence();
@@ -625,7 +656,7 @@ bool SearchServiceImpl::InfluenceSearchByUser(const string& input, string& outpu
             inf->set_score(ui.weight);
         }
     }
-    for (auto eit = vit->OutEdges(); eit->Alive(); eit->Next()) {
+    for (auto eit = vit->InEdges(); eit->Alive(); eit->Next()) {
         if (eit->TypeName() == "UserInfluence") {
             auto ui = parse<UserInfluence>(eit->Data());
             Influence *inf = response.add_influenced_by();

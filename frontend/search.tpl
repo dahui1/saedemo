@@ -61,6 +61,10 @@
 		color: grey;
 	}
 
+	.extra-item-stat {
+		margin-left: 6px;
+	}
+
 </style>
 
 <form class="search form-search" method="get">
@@ -135,7 +139,12 @@
 				%if item['link']:
 					<a class="extra-item-title" href="{{item['link']}}">{{item['text']}}</a>
 				%else:
-					<span class="extra-item-title">{{item['text']}}</span>
+					<span class="extra-item-title">
+					%if len(item.get('user', [])) > 0:
+						<a href="http://weibo.com/u/{{item['user'][0].url}}">@{{item['user'][0].title}}</a>：
+					%end
+					{{item['text']}}
+					</span>
 				%end
 				</div>
 				%if 'authors' in item:
@@ -144,7 +153,13 @@
 				<div class="extra-item-stats">
 					%stats = item.get('stats', {})
 					%if stats.get('citation', -1) > 0:
-					<div class="extra-item-citation pull-right">citations:{{stats['citation']}}</div>
+					<div class="extra-item-stat pull-right">citations:{{stats['citation']}}</div>
+					%end
+					%if stats.get('Reposts', 0) > 0:
+					<div class="extra-item-stat pull-right">reposts:{{stats['Reposts']}}</div>
+					%end
+					%if stats.get('Comments', 0) > 0:
+					<div class="extra-item-stat pull-right">comments:{{stats['Comments']}}</div>
 					%end
 					%if 'year' in stats:
 					<div class="extra-item-year">{{stats['year']}}</div>
