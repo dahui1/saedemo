@@ -35,7 +35,7 @@ protected:
         for (const indexing::QueryItem& item : user_wbs.second)
         {
             auto wb = data.get<Weibo>(item.docId);
-            score += item.score;
+            score += item.score * (1 + wb.reposts_count) / 2;
         }
 
         return score;

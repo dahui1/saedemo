@@ -80,8 +80,11 @@ class asker_p():
                 temp.append(result.entity[0].title)
                 #temp.append(influence[top_id][j].id)
                 temp.append(influence[top_id][j].score)
-		url="http://www.pminer.org/company.do?m=viewCompany&id="
-		url+=str(result.entity[0].original_id)
+		#url="http://www.pminer.org/company.do?m=viewCompany&id="
+		#url+=str(result.entity[0].original_id)
+                url="../"
+		url+=str(result.entity[0].id)
+		url+="/influence"
 		temp.append(url)
                 tmp_t=tuple(temp)
                 topics['influencees'].append(tmp_t)
@@ -93,8 +96,11 @@ class asker_p():
                 temp.append(result.entity[0].title)
                 #temp.append(influenced_by[top_id][j].id)
                 temp.append(influenced_by[top_id][j].score)
-                url="http://www.pminer.org/company.do?m=viewCompany&id="
-		url+=str(result.entity[0].original_id)
+                #url="http://www.pminer.org/company.do?m=viewCompany&id="
+		#url+=str(result.entity[0].original_id)
+                url="../"
+		url+=str(result.entity[0].id)
+		url+="/influence"
 		temp.append(url)
                 tmp_t=tuple(temp)
                 topics['influencers'].append(tmp_t)
@@ -126,11 +132,14 @@ class asker_t_p():
                 tmp['date']=str(i)
                 tmp['value']=num[i]
                 tmp['pap1']=pub[i][0].title
-                tmp['au1']=""
+                tmp['au1']=pub[i][0].description
+                tmp['cit1']=-1
 		tmp['pap2']=0
                 tmp['au2']=""
+                tmp['cit2']=-1
                 if num[i]>1:
                     tmp['pap2']=pub[i][1].title
+                    tmp['au2']=pub[i][1].description
                 trend.append(tmp)
         return trend
 
@@ -186,7 +195,6 @@ class asker_table_p():
                 tmp_id=peo[i][j]
                 result=self.client.group_search_by_id("",[tmp_id])
                 tmp['name']=result.entity[0].title
-                #tmp['name']=str(tmp_id)
                 tmp['group']=2
                 table['nodes'].append(tmp)
             for j in range(0,num[i]):

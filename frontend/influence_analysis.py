@@ -77,8 +77,9 @@ class asker():
                 result=self.client.author_search_by_id("",[influence[top_id][j].id])
                 tmp_l.append(result.entity[0].title)
                 tmp_l.append(influence[top_id][j].score)
-		url="http://arnetminer.org/person/-/"
-		url+=str(result.entity[0].original_id)
+		url="../"
+		url+=str(result.entity[0].id)
+		url+="/influence"
 		tmp_l.append(url)
                 tmp_t=tuple(tmp_l)
                 topics['influencees'].append(tmp_t)
@@ -89,8 +90,9 @@ class asker():
                 result=self.client.author_search_by_id("",[influenced_by[top_id][j].id])
                 tmp_l.append(result.entity[0].title)
                 tmp_l.append(influenced_by[top_id][j].score)
-                url="http://arnetminer.org/person/-/"
-		url+=str(result.entity[0].original_id)
+                url="../"
+		url+=str(result.entity[0].id)
+		url+="/influence"
 		tmp_l.append(url)
                 tmp_t=tuple(tmp_l)
                 topics['influencers'].append(tmp_t)
@@ -110,10 +112,14 @@ class asker_t():
         pub_result=self.client.pub_search_by_author("",self.a)
         pub=[[]for x in range(3000)]
         num=[0 for x in range(3000)]
+        cita=[0 for x in range(3000)]
         for item in pub_result.entity:
             year=item.stat[0].value
+            if year==2013:
+                continue
             pub[year].append(item)
             num[year]+=1
+            cita[year]+=item.stat[2].value
         trend=[]
         for i in range(1000,3000):
             if num[i]>0:
@@ -121,9 +127,14 @@ class asker_t():
                 tmp={}
                 tmp['date']=str(i)
                 tmp['value']=num[i]
+                #tmp['value']=cita[i]
                 tmp['pap1']=pub[i][0].title
 		result=self.client.author_search_by_id("",pub[i][0].related_entity[0].id)
-		author = ', '.join([e.title for e in result.entity])
+		#author=result.entity[0].title
+		author=', '.join([e.title for e in result.entity])
+		#for j in range(1,result.total_count):
+                    #author+=', '
+		    #author+=result.entity[j].title
                 tmp['au1']=author
                 tmp['cit1']=pub[i][0].stat[2].value
 		tmp['pap2']=0
@@ -134,19 +145,129 @@ class asker_t():
                     result=self.client.author_search_by_id("",pub[i][1].related_entity[0].id)
 		    author=result.entity[0].title
 		    for j in range(1,result.total_count):
+                        author+=', '
 			author+=result.entity[j].title
-			author+=', '
 		    tmp['au2']=author
                     tmp['cit2']=pub[i][1].stat[2].value
                 trend.append(tmp)
         return trend
 
 class asker_table():
-    
+
     def __init__(self, client):
         self.client = client
+        self.N=1231987
+        N=1231987
+        self.M=10380000
+        M=10380000
+        self.first=[-1 for x in range(N)]
+        self.nex=[0 for x in range(M)]
+        self.en=[0 for x in range(M)]
+        self.dis=[0 for x in range(M)]
+        self.peo=[0 for x in range(N)]
+        self.num=[0 for x in range(N)]
+        self.au=[0 for x in range(N)]
+        self.has=[0 for x in range(14377300)]
+        self.out=[0 for x in range(N)]
+        fileHandle = open ( 'au.txt')
+        fileList=fileHandle.readlines()
+        i=0
+        for fileLine in fileList:
+            words=fileLine.split(' ')
+            o_id=int(words[0])
+            pa=int(words[1])
+            self.has[o_id]=i
+            self.num[i]=o_id
+            self.au[i]=pa
+            i+=1
+        fileHandle.close()
+        fileHandle = open ( 'peo_year.txt')
+        fileList=fileHandle.readlines()
+        i=0
+        for fileLine in fileList:
+            words=fileLine.split(' ')
+            self.peo[i]=int(words[1])
+            i+=1
+        fileHandle.close()
+        fileHandle = open ( '/home/thinxer/aminer/cc2_s.txt' ) 
+        fileList = fileHandle.readlines() 
+        edge=0
+        for fileLine in fileList: 
+            words=fileLine.split(' ')
+            x=int(words[0])
+            idx=self.has[x]
+            y=int(words[1])
+            idy=self.has[y]
+            z=int(words[2])
+            edge+=1
+            self.nex[edge]=self.first[idx]
+            self.first[idx]=edge
+            self.en[edge]=idy
+            self.dis[edge]=z
+        fileHandle.close() 
+
+    def req(self, source, target):
+        idx=self.has[source]
+        idy=self.has[target]
+        x=self.first[idx]
+        while x!=-1:
+            y=self.en[x]
+            if (y==idy):
+                return float(self.dis[x])
+            x=self.nex[x]
+        return 0.0
+        """
+        dui=[{} for x in range(1000)]
+        idx=self.has[source]
+        idy=self.has[target]
+        for i in range(1000):
+            dui[i]['node']=0
+            dui[i]['wei']=0.0
+            dui[i]['num']=0.0
+        h=0
+        t=1
+        dui[t]['node']=idx
+        dui[t]['wei']=0.0
+        dui[t]['num']=0.0
+        st=set()
+        st.add(idx)
+        tot=0
+        while h<t:
+            h+=1
+            tot+=1
+            now=dui[h]
+            x=self.first[now['node']]
+            y=self.en[x]
+            if (tot>3):
+                return 0.0
+            while x!=-1:
+                y=self.en[x]
+                t+=1
+                if t>=1000:
+                    return 0.0
+                dui[t]['node']=y
+                dui[t]['num']=float(now['num']+1)
+                dui[t]['wei']=float(now['wei']+self.dis[x])
+                if y==idy:
+                    return dui[t]['wei']/dui[t]['num']
+                
+                if (y in st == False):
+                    t+=1
+                    if t>=1000:
+                        return 0.0
+                    dui[t]['node']=y
+                    dui[t]['num']=float(now['num']+1)
+                    dui[t]['wei']=float(now['wei']+self.dis[x])
+                    st.add(y)
+                    if y==idy:
+                        return dui[t]['wei']/dui[t]['num']
+                
+                x=self.nex[x]
+        return 0.0
+        """
 
     def ask(self,id):
+        print ("start")
         a=int()
         a=id
         pub=self.client.influence_search_by_author("",a)
@@ -166,7 +287,7 @@ class asker_table():
             score[i.topic]['score']+=i.score
             score[i.topic]['topic']=i.topic
             num_influence[i.topic]+=1
-        score.sort(key=lambda x:x['score'],reverse=True);
+        score.sort(key=lambda x:x['score'],reverse=True)
         for i in result2:
             influenced_by[i.topic].append(i)
             num_influenced_by[i.topic]+=1
@@ -183,73 +304,62 @@ class asker_table():
             table={}
             table['nodes']=[]
             table['links']=[]
+            peo[i][0]=a
             for j in range(0,num_1):
-                peo[i][j]=influence[top_id][j].id
+                peo[i][j+1]=influence[top_id][j].id
             for j in range(0,num_2):
-                peo[i][j+num_1]=influenced_by[top_id][j].id
-            peo[i][num[i]-1]=a
-            st=set()
+                peo[i][j+num_1+1]=influenced_by[top_id][j].id
+            dt=[0 for x in range(20)]
+            gy=0.0
+            tmpvalue=[[0.0 for y in range(20)]for x in range(20)]
+            value=[[0.0 for y in range(20)]for x in range(20)]
             for j in range(0,num[i]):
                 tmp={}
                 tmp_id=peo[i][j]
-                st.add(peo[i][j])
                 result=self.client.author_search_by_id("",[tmp_id])
                 tmp['name']=result.entity[0].title
+                dt[j]=result.entity[0].original_id
                 tmp['group']=2
                 table['nodes'].append(tmp)
-            #print st
-            #res_in=[[]for x in range(100)]
-            #for j in range(0,num[i]):
-                #res_in[j]=self.client.influence_search_by_author("",peo[i][j]).influence
             for j in range(0,num[i]):
                 pub=self.client.influence_search_by_author("",peo[i][j])
-                tmp={}
-                weight=0.0       
-                for l in pub.influence:
-                    if l.topic==top_id and (l.id in st)==True:
-                        weight=l.score
-                        k=l.id
-                        break      
-                #if weight==0:
-                   # for l in pub.influence:
-                        #pub2=self.client.influence_search_by_author("",l.id)
-                        #flag=0
-                        #for q in pub2.influence:
-                           # if q.topic==top_id and (q.id in st)==True:
-                           #     weight=q.score
-                          #      flag=1
-                        #        break
-                      #  if flag==1:
-                      #      break
-                        """
-                        if l.topic==top_id:
-                            pub2=self.client.influence_search_by_author("",l.id)
-                            flag=0
-                            for q in pub2.influence:
-                                if q.topic==top_id and (q.id in st)==True:
-                                    weight=q.score
-                                    flag=1
-                                    break
-                            if flag==1:
-                                break
-                        """
-                if weight==0:
-                    continue
-                weight=weight**(1.0/3)
-                if weight<0.5:
-                    weight+=0.3
-                tmp['source']=j
-                for q in range(0,num[i]):
-                    if peo[i][q]==k:
-                        res=q
-                        break
-                tmp['target']=q
-                tmp['value']=weight
-                table['links'].append(tmp)
+                for k in range(0,num[i]):
+                    if j==k:
+                        continue
+                    weight=0.0
+                    for l in pub.influence:
+                        if l.topic==top_id and l.id==peo[i][k]:
+                            weight=l.score
+                            break
+                    if weight<0.1 and weight!=0:
+                        weight=weight**(1.0/3)
+                    value[j][k]=weight
+                    if weight==0:
+                        weight=self.req(dt[j], dt[k])
+                        #print dt[j],dt[k]
+                        if self.peo[self.has[dt[j]]]<self.peo[self.has[dt[k]]]:
+                            tmpvalue[j][k]=weight
+                        if weight>gy:
+                            gy=weight
+            for j in range(0,num[i]):
+                weight=0.0
+                for k in range(0,num[i]):
+                    if j==k:
+                        continue
+                    tmp={}
+                    tmp['source']=j
+                    tmp['target']=k
+                    weight=value[j][k]
+                    if value[j][k]==0 and gy!=0:
+                        weight=tmpvalue[j][k]/gy
+                        if weight<0.1 and weight!=0:
+                            weight=weight**(1.0/3)
+                    tmp['value']=weight
+                    table['links'].append(tmp)
             table_list.append(table)
         return table_list
-    
+
 #from saeclient import *
-#client = SAEClient("tcp://10.1.1.111:40114")
+#client = SAEClient("tcp://10.1.1.111:40113")
 #p=asker_table(client)
-#print p.ask(744714)
+#print p.req(265966,575748)

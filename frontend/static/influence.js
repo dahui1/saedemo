@@ -100,11 +100,21 @@ function drawChart() {
 	  var d = this.__data__;
 	  var html;
 	  if (d.pap2!=0){
+	    if (d.cit1!=-1){
 	    html = '<span class="title">' + d.pap1 +'<br></span><span class="author">'+d.au1 + ' </span><br>'+d.year+'<span class="cita">CitedBy: ' + d.cit1
 		  +'</span><br><span class="title"><br>' + d.pap2  +'<br></span><span class="author">'+d.au2 +'</span><br> '+d.year+'<span class="cita">CitedBy: ' 
 		  + d.cit2 +"</span>";
+		 }else{html='<span class="title">' + d.pap1 +'<br></span><span class="author">'+d.au1 + ' </span><br>'+d.year+
+	         '<br><span class="title"><br>' + d.pap2  +'<br></span><span class="author">'+d.au2 +'</span><br> '+d.year;
+			 
+		 }
 	  } else {
+	    if (d.cit1!=-1){
 	    html = '<span class="title">' + d.pap1+'<br></span><span class="author">'+d.au1 + ' </span><br>'+d.year+'<span class="cita">Citations: ' + d.cit1;
+		}else{
+		html='<span class="title">' + d.pap1+'<br></span><span class="author">'+d.au1 + ' </span><br>'+d.year;
+			 
+		}
 	  }
 	  $('.detailed-info').html(html);
         });
@@ -188,17 +198,18 @@ var svg = d3.select(".topic-analysis.index" + index + " .table").append("svg")//
   // Convert links to matrix; count character occurrences.
   miserables[index].links.forEach(function(link) {
     //alert(link.value);
-      matrix[link.source][link.target].z += link.value;
+
+      matrix[link.source][link.target].z=link.value;
    // nodes[link.source].count += link.value;
    // nodes[link.target].count += link.value;
   });
 
   // Precompute the orders.
   var orders = {
-    name: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].name, nodes[b].name); }),
-    //count: d3.range(n).sort(function(a, b) { return nodes[b].count - nodes[a].count; }),
+    name: d3.range(n).sort(function(a, b) { return nodes[b].name - nodes[a].name; }),
+	//count: d3.range(n).sort(function(a, b) { return nodes[b].count - nodes[a].count; }),
   //  group: d3.range(n).sort(function(a, b) { return nodes[b].group - nodes[a].group; })
-  };
+ };
 
   // The default sort order.
   x.domain(orders.name);
@@ -244,15 +255,31 @@ var svg = d3.select(".topic-analysis.index" + index + " .table").append("svg")//
 }
   function row(row) {
     var cell = d3.select(this).selectAll(".cell")
-        .data(row.filter(function(d) { return d.z; }))
+        .data(row)
       .enter().append("rect")
         .attr("class", "cell")
         .attr("x", function(d) { return x(d.x); })
         .attr("width", x.rangeBand())
         .attr("height", x.rangeBand())
-        .style("fill-opacity", function(d) { return d.z; })
+		//.style("fill-opacity", function(d){return d.z;})
+		//.style("fill","red")
+		
+        .style("fill-opacity", function(d) { 
+			opac = d.z;
+			if(d.z == 0.0){
+				opac = .5;
+			}
+		return opac; 
+		})
         //.style("fill", function(d) { return nodes[d.x].group == nodes[d.y].group ? c(nodes[d.x].group) : null; })
-		.style("fill","red")
+		.style("fill",function(d){
+			color = "red";
+			if(d.z == 0.0){
+				color = "lightgray";
+			}
+			return color;
+		})
+		.style("stroke", "white")
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
   }

@@ -11,12 +11,12 @@ import network_integration
 from knowledge_drift import KnowledgeDrift
 import influence_analysis
 import influence_analysis_patent
-import sample_data
+import influence_analysis_weibo
 import time
 import json
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-client = SAEClient("tcp://127.0.0.1:40116")
+client = SAEClient("tcp://127.0.0.1:40113")
 
 knowledge_drift_clients = {}
 def get_knowledge_drift_client(dataset):
@@ -31,6 +31,9 @@ ask_table=influence_analysis.asker_table(client)
 ask_influ_p=influence_analysis_patent.asker_p(client)
 ask_tre_p=influence_analysis_patent.asker_t_p(client)
 ask_table_p=influence_analysis_patent.asker_table_p(client)
+ask_influ_w=influence_analysis_weibo.asker_w(client)
+ask_tre_w=influence_analysis_weibo.asker_t_w(client)
+ask_table_w=influence_analysis_weibo.asker_table_w(client)
 
 logging.info("done")
 
@@ -226,6 +229,12 @@ def influence_trends_p( uid):
     tmp_idd=int()
     tmp_idd=uid
     return json.dumps(ask_tre_p.ask(tmp_idd))
+
+@route('/weibo/<uid:int>/influence/trends')
+def influence_trends_w( uid):
+    tmp_idd=int()
+    tmp_idd=uid
+    return json.dumps(ask_tre_w.ask(tmp_idd))
     
 
 @route('/academic/<uid:int>/influence/miserable')
@@ -242,6 +251,13 @@ def influence_table_p(uid):
     da=ask_table_p.ask(tmp_id)
     return json.dumps(da)
 
+@route('/weibo/<uid:int>/influence/miserable')
+def influence_table_w(uid):
+    tmp_id=int()
+    tmp_id=uid
+    da=ask_table_w.ask(tmp_id)
+    return json.dumps(da)
+
 @route('/academic/<uid:int>/influence/paper')
 def influence_paper(uid):
     tmp_id=int()
@@ -253,6 +269,12 @@ def influence_paper(uid):
     tmp_id=int()
     tmp_id=uid
     return json.dumps(ask_influ_p.ask_pie(tmp_id))
+
+@route('/weibo/<uid:int>/influence/paper')
+def influence_paper(uid):
+    tmp_id=int()
+    tmp_id=uid
+    return json.dumps(ask_influ_w.ask_pie(tmp_id))
 
 @route('/academic/<uid:int>/influence/topics/<date>')
 @view('influence_topics')
@@ -268,6 +290,13 @@ def influence_topics_p( uid,date):
     tmp_id=uid
     return ask_influ_p.ask(tmp_id)
 
+@route('/weibo/<uid:int>/influence/topics/<date>')
+@view('influence_topics')
+def influence_topics_w( uid,date):
+    tmp_id=int()
+    tmp_id=uid
+    return ask_influ_w.ask(tmp_id)
+
 @route('/academic/<uid:int>/influence')
 @view('influence')
 def influence(uid):
@@ -282,6 +311,16 @@ def influence(uid):
 @view('influence')
 def influence(uid):
     result=client.group_search_by_id("",[uid])
+    influence_index=dict(
+        name=result.entity[0].title,
+        imgurl=result.entity[0].imgurl
+    )
+    return influence_index
+
+@route('/weibo/<uid:int>/influence')
+@view('influence')
+def influence(uid):
+    result=client.user_search_by_id("",[uid])
     influence_index=dict(
         name=result.entity[0].title,
         imgurl=result.entity[0].imgurl
