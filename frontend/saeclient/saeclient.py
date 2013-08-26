@@ -147,10 +147,28 @@ class SAEClient(object):
         er = interface_pb2.InfluenceSearchResponse()
         er.ParseFromString(response)
         return er
+    
+    def structure_hole_analyze(self, algorithm, path): 
+        r = interface_pb2.AnalyzeRequest()
+        r.path = path
+        r.algorithm = algorithm
+        response = pbrequest(self.endpoint, "Analyze", r)
+        er = interface_pb2.AnalyzeResponse()
+        er.ParseFromString(response)
+        return er
+
+    def med_pub_search(self, dataset, query, offset=0, count=20):
+        return self._entity_search("MedPubSearch", query, offset, count)
+  
+    def med_author_search(self, dataset, query, offset=0, count=20):
+        return self._entity_search("MedAuthorSearch", query, offset, count)
+
+    def med_journal_search(self, dataset, query, offset=0, count=20):
+        return self._entity_search("MedJournalSearch", query, offset, count)
 
 def main():
     c = SAEClient("tcp://localhost:70112")
-    print c.user_search_by_id("",[21])
+    print c.med_pub_search("","cancer")
 
 
 if __name__ == "__main__":

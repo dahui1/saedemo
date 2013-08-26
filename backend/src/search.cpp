@@ -8,6 +8,7 @@
 #include "expert_searcher.hpp"
 #include "group_searcher.hpp"
 #include "user_searcher.hpp"
+#include "med_expert_searcher.hpp"
 
 using namespace std;
 using namespace demoserver;
@@ -16,7 +17,7 @@ using namespace std::chrono;
 using namespace sae::io;
 
 struct SearchServiceImpl : public SearchService {
-    SearchServiceImpl(std::unique_ptr<AMinerData>&& adata, std::unique_ptr<PMinerData>&& pdata, std::unique_ptr<WeiboData>&& wdata);
+    SearchServiceImpl(std::unique_ptr<AMinerData>&& adata, std::unique_ptr<PMinerData>&& pdata, std::unique_ptr<WeiboData>&& wdata, std::unique_ptr<PubmedData>&& meddata);
     ~SearchServiceImpl() {}
 
     //aminer services
@@ -43,9 +44,14 @@ struct SearchServiceImpl : public SearchService {
     bool WeiboSearchByUser(const string& input, string& output);
     bool InfluenceSearchByUser(const string& input, string& output);
     bool UserSearchById(const string& input, string& output);
+    
+    //pubmed services
+    bool MedPubSearch(const std::string&, std::string&);
+    bool MedAuthorSearch(const std::string&, std::string&);
+    bool MedJournalSearch(const std::string&, std::string&);
 
     void attachTo(sae::rpc::RpcServer* server) {
-        LOG(INFO) << "Binding  services...";
+        LOG(INFO) << "Binding searching services...";
         auto b = sae::rpc::make_binder(*this);
 
         //aminer services
@@ -73,6 +79,11 @@ struct SearchServiceImpl : public SearchService {
         server->addMethod("WeiboSearchByUser", b(&SearchServiceImpl::WeiboSearchByUser));
         server->addMethod("InfluenceSearchByUser", b(&SearchServiceImpl::InfluenceSearchByUser));
 
+        //pubmed services
+        server->addMethod("MedPubSearch", b(&SearchServiceImpl::MedPubSearch));
+        server->addMethod("MedAuthorSearch", b(&SearchServiceImpl::MedAuthorSearch));
+        server->addMethod("MedJournalSearch", b(&SearchServiceImpl::MedJournalSearch));        
+
         LOG(INFO) << "Services have been set up.";
     };
 
@@ -80,6 +91,7 @@ private:
     std::unique_ptr<AMinerData> aminer;
     std::unique_ptr<PMinerData> pminer;
     std::unique_ptr<WeiboData> weibo;
+    std::unique_ptr<PubmedData> pubmed;
 };
 
 namespace {
@@ -132,8 +144,8 @@ namespace {
     }
 }
 
-SearchServiceImpl::SearchServiceImpl(std::unique_ptr<AMinerData>&& adata, std::unique_ptr<PMinerData>&& pdata, std::unique_ptr<WeiboData>&& wdata)
-    : aminer(std::move(adata)), pminer(std::move(pdata)), weibo(std::move(wdata)) {
+SearchServiceImpl::SearchServiceImpl(std::unique_ptr<AMinerData>&& adata, std::unique_ptr<PMinerData>&& pdata, std::unique_ptr<WeiboData>&& wdata, std::unique_ptr<PubmedData>&& meddata)
+    : aminer(std::move(adata)), pminer(std::move(pdata)), weibo(std::move(wdata)), pubmed(std::move(meddata)) {
 }
 
 bool SearchServiceImpl::AuthorSearchById(const string& input, string& output) {
@@ -735,6 +747,98 @@ bool SearchServiceImpl::UserSearchById(const string& input, string& output) {
     return response.SerializeToString(&output);
 }
 
-SearchService* SearchService::CreateService(std::unique_ptr<AMinerData>&& adata, std::unique_ptr<PMinerData>&& pdata, std::unique_ptr<WeiboData>&& wdata) {
-    return new SearchServiceImpl(std::move(adata), std::move(pdata), std::move(wdata));
+bool SearchServiceImpl::MedPubSearch(const string& input, string& output) {
+    EntitySearchRequest request;
+    request.ParseFromString(input);
+    string query = request.query();
+
+    int offset = request.has_offset() ? request.offset() : 0;
+    int count = request.has_count() ? request.count() : 50;
+
+    auto result = pubmed->search_publications(query);
+
+    if (result.size() > 5000)
+        result.resize(5000);
+
+    EntitySearchResponse response;
+    response.set_total_count(result.size());
+    response.set_query(query);
+    for (int ri = offset; ri < result.size() && ri - offset < count; ri++) {
+        auto i = result[ri];
+        DetailedEntity *de = response.add_entity();
+        auto vi = pubmed->g->Vertices();
+        vi->MoveTo(i.docId);
+        auto p = parse<Pub>(vi->Data());
+        de->set_id(i.docId);
+        de->set_title(p.title);
+        de->set_description(p.abstract);
+        auto stat = de->add_stat();
+        stat->set_type("Year");
+        stat->set_value(p.year);
+        string topics = "";
+        for (int i = 0; i < p.keywords.size(); i++) {
+            if (i == p.keywords.size() - 1)
+                topics += p.keywords[i];
+            else
+                topics += p.keywords[i] + ",";
+        }
+        de->set_topics(topics);
+        auto re = de->add_related_entity();
+        re->set_type("Author");
+        for (auto ei = vi->InEdges(); ei->Alive(); ei->Next()) {
+            if (ei->TypeName() == "Publish") {
+                re->add_id(ei->SourceId());
+            }
+        }
+    }
+    return response.SerializeToString(&output);
+}
+
+bool SearchServiceImpl::MedAuthorSearch(const string& input, string& output) {
+    EntitySearchRequest request;
+    request.ParseFromString(input);
+    string query = request.query();
+
+    int offset = request.has_offset() ? request.offset() : 0;
+    int count = request.has_count() ? request.count() : 50;
+
+    auto result = MedExpertSearcher(*pubmed).search(query);
+    EntitySearchResponse response;
+    response.set_total_count(count);
+    response.set_query(query);
+    for (int ri = offset; ri < result.size() && ri - offset < count; ri++) {
+        auto i = result[ri];
+        DetailedEntity *de = response.add_entity();
+        auto p = pubmed->get<Authors>(i.docId);
+        de->set_id(i.docId);
+        de->set_title(p.name);
+    }
+    return response.SerializeToString(&output);
+}
+
+bool SearchServiceImpl::MedJournalSearch(const string& input, string& output) {
+    EntitySearchRequest request;
+    request.ParseFromString(input);
+    string query = request.query();
+
+    int offset = request.has_offset() ? request.offset() : 0;
+    int count = request.has_count() ? request.count() : 50;
+
+    auto result = JournalSearcher(*pubmed).search(query);
+    EntitySearchResponse response;
+    response.set_total_count(count);
+    response.set_query(query);
+    for (int ri = offset; ri < result.size() && ri - offset < count; ri++) {
+        auto i = result[ri];
+        DetailedEntity *de = response.add_entity();
+        auto p = pubmed->get<Journal>(i.docId);
+        de->set_id(i.docId);
+        de->set_title(p.name);
+    }
+    return response.SerializeToString(&output);
+}
+
+
+SearchService* SearchService::CreateService(std::unique_ptr<AMinerData>&& adata, std::unique_ptr<PMinerData>&& pdata, std::unique_ptr<WeiboData>&& wdata, std::unique_ptr<PubmedData>&& meddata) {
+    return new SearchServiceImpl(std::move(adata), std::move(pdata), std::move(wdata), std::move(meddata));
 }

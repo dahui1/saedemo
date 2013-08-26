@@ -11,7 +11,7 @@ from google.protobuf import descriptor_pb2
 DESCRIPTOR = descriptor.FileDescriptor(
   name='interface.proto',
   package='demoserver',
-  serialized_pb='\n\x0finterface.proto\x12\ndemoserver\"T\n\x13\x45ntitySearchRequest\x12\x0f\n\x07\x64\x61taset\x18\x01 \x02(\t\x12\r\n\x05query\x18\x02 \x02(\t\x12\x0e\n\x06offset\x18\x03 \x01(\x05\x12\r\n\x05\x63ount\x18\x04 \x01(\x05\"2\n\x13\x45ntityDetailRequest\x12\x0f\n\x07\x64\x61taset\x18\x01 \x02(\t\x12\n\n\x02id\x18\x02 \x03(\x05\"#\n\x04Stat\x12\x0c\n\x04type\x18\x01 \x02(\t\x12\r\n\x05value\x18\x02 \x02(\x05\")\n\rRelatedEntity\x12\x0c\n\x04type\x18\x01 \x02(\t\x12\n\n\x02id\x18\x02 \x03(\x05\"\xd5\x01\n\x0e\x44\x65tailedEntity\x12\r\n\x05title\x18\x01 \x02(\t\x12\n\n\x02id\x18\x02 \x02(\x05\x12\x0b\n\x03url\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\x12\x1e\n\x04stat\x18\x05 \x03(\x0b\x32\x10.demoserver.Stat\x12\x0e\n\x06topics\x18\x06 \x01(\t\x12\x0e\n\x06imgurl\x18\x07 \x01(\t\x12\x13\n\x0boriginal_id\x18\x08 \x01(\x05\x12\x31\n\x0erelated_entity\x18\t \x03(\x0b\x32\x19.demoserver.RelatedEntity\"f\n\x14\x45ntitySearchResponse\x12\r\n\x05query\x18\x01 \x02(\t\x12\x13\n\x0btotal_count\x18\x02 \x02(\x05\x12*\n\x06\x65ntity\x18\x03 \x03(\x0b\x32\x1a.demoserver.DetailedEntity\"5\n\tInfluence\x12\n\n\x02id\x18\x01 \x02(\x05\x12\r\n\x05topic\x18\x02 \x02(\x05\x12\r\n\x05score\x18\x03 \x02(\x01\"\x84\x01\n\x17InfluenceSearchResponse\x12\x11\n\tentity_id\x18\x01 \x02(\x05\x12(\n\tinfluence\x18\x02 \x03(\x0b\x32\x15.demoserver.Influence\x12,\n\rinfluenced_by\x18\x03 \x03(\x0b\x32\x15.demoserver.Influence')
+  serialized_pb='\n\x0finterface.proto\x12\ndemoserver\"T\n\x13\x45ntitySearchRequest\x12\x0f\n\x07\x64\x61taset\x18\x01 \x02(\t\x12\r\n\x05query\x18\x02 \x02(\t\x12\x0e\n\x06offset\x18\x03 \x01(\x05\x12\r\n\x05\x63ount\x18\x04 \x01(\x05\"2\n\x13\x45ntityDetailRequest\x12\x0f\n\x07\x64\x61taset\x18\x01 \x02(\t\x12\n\n\x02id\x18\x02 \x03(\x05\"K\n\x0bVDataDetail\x12\n\n\x02id\x18\x01 \x02(\x05\x12\x0c\n\x04name\x18\x02 \x02(\t\x12\x13\n\x0b\x63ommunities\x18\x03 \x03(\x05\x12\r\n\x05score\x18\x04 \x02(\x01\"\x1c\n\x04\x45\x64ge\x12\t\n\x01\x66\x18\x01 \x02(\x05\x12\t\n\x01l\x18\x02 \x02(\x05\"\xa4\x01\n\x07Outdata\x12\n\n\x02id\x18\x01 \x02(\x05\x12\r\n\x05score\x18\x02 \x02(\x01\x12\x0c\n\x04name\x18\x03 \x02(\t\x12\x13\n\x0b\x63ommunities\x18\x04 \x03(\x05\x12)\n\x08neighbor\x18\x05 \x03(\x0b\x32\x17.demoserver.VDataDetail\x12\x1e\n\x04\x65\x64ge\x18\x06 \x03(\x0b\x32\x10.demoserver.Edge\x12\x10\n\x08pagerank\x18\x07 \x02(\x01\"1\n\x0e\x41nalyzeRequest\x12\x0c\n\x04path\x18\x01 \x02(\t\x12\x11\n\talgorithm\x18\x02 \x02(\t\"S\n\x0f\x41nalyzeResponse\x12\x0c\n\x04path\x18\x01 \x02(\t\x12\x1f\n\x02us\x18\x02 \x03(\x0b\x32\x13.demoserver.Outdata\x12\x11\n\talgorithm\x18\x03 \x02(\t\"#\n\x04Stat\x12\x0c\n\x04type\x18\x01 \x02(\t\x12\r\n\x05value\x18\x02 \x02(\x05\")\n\rRelatedEntity\x12\x0c\n\x04type\x18\x01 \x02(\t\x12\n\n\x02id\x18\x02 \x03(\x05\"\xd5\x01\n\x0e\x44\x65tailedEntity\x12\r\n\x05title\x18\x01 \x02(\t\x12\n\n\x02id\x18\x02 \x02(\x05\x12\x0b\n\x03url\x18\x03 \x01(\t\x12\x13\n\x0b\x64\x65scription\x18\x04 \x01(\t\x12\x1e\n\x04stat\x18\x05 \x03(\x0b\x32\x10.demoserver.Stat\x12\x0e\n\x06topics\x18\x06 \x01(\t\x12\x0e\n\x06imgurl\x18\x07 \x01(\t\x12\x13\n\x0boriginal_id\x18\x08 \x01(\x05\x12\x31\n\x0erelated_entity\x18\t \x03(\x0b\x32\x19.demoserver.RelatedEntity\"f\n\x14\x45ntitySearchResponse\x12\r\n\x05query\x18\x01 \x02(\t\x12\x13\n\x0btotal_count\x18\x02 \x02(\x05\x12*\n\x06\x65ntity\x18\x03 \x03(\x0b\x32\x1a.demoserver.DetailedEntity\"5\n\tInfluence\x12\n\n\x02id\x18\x01 \x02(\x05\x12\r\n\x05topic\x18\x02 \x02(\x05\x12\r\n\x05score\x18\x03 \x02(\x01\"\x84\x01\n\x17InfluenceSearchResponse\x12\x11\n\tentity_id\x18\x01 \x02(\x05\x12(\n\tinfluence\x18\x02 \x03(\x0b\x32\x15.demoserver.Influence\x12,\n\rinfluenced_by\x18\x03 \x03(\x0b\x32\x15.demoserver.Influence')
 
 
 
@@ -100,6 +100,237 @@ _ENTITYDETAILREQUEST = descriptor.Descriptor(
 )
 
 
+_VDATADETAIL = descriptor.Descriptor(
+  name='VDataDetail',
+  full_name='demoserver.VDataDetail',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='id', full_name='demoserver.VDataDetail.id', index=0,
+      number=1, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='name', full_name='demoserver.VDataDetail.name', index=1,
+      number=2, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='communities', full_name='demoserver.VDataDetail.communities', index=2,
+      number=3, type=5, cpp_type=1, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='score', full_name='demoserver.VDataDetail.score', index=3,
+      number=4, type=1, cpp_type=5, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=169,
+  serialized_end=244,
+)
+
+
+_EDGE = descriptor.Descriptor(
+  name='Edge',
+  full_name='demoserver.Edge',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='f', full_name='demoserver.Edge.f', index=0,
+      number=1, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='l', full_name='demoserver.Edge.l', index=1,
+      number=2, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=246,
+  serialized_end=274,
+)
+
+
+_OUTDATA = descriptor.Descriptor(
+  name='Outdata',
+  full_name='demoserver.Outdata',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='id', full_name='demoserver.Outdata.id', index=0,
+      number=1, type=5, cpp_type=1, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='score', full_name='demoserver.Outdata.score', index=1,
+      number=2, type=1, cpp_type=5, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='name', full_name='demoserver.Outdata.name', index=2,
+      number=3, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='communities', full_name='demoserver.Outdata.communities', index=3,
+      number=4, type=5, cpp_type=1, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='neighbor', full_name='demoserver.Outdata.neighbor', index=4,
+      number=5, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='edge', full_name='demoserver.Outdata.edge', index=5,
+      number=6, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='pagerank', full_name='demoserver.Outdata.pagerank', index=6,
+      number=7, type=1, cpp_type=5, label=2,
+      has_default_value=False, default_value=0,
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=277,
+  serialized_end=441,
+)
+
+
+_ANALYZEREQUEST = descriptor.Descriptor(
+  name='AnalyzeRequest',
+  full_name='demoserver.AnalyzeRequest',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='path', full_name='demoserver.AnalyzeRequest.path', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='algorithm', full_name='demoserver.AnalyzeRequest.algorithm', index=1,
+      number=2, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=443,
+  serialized_end=492,
+)
+
+
+_ANALYZERESPONSE = descriptor.Descriptor(
+  name='AnalyzeResponse',
+  full_name='demoserver.AnalyzeResponse',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    descriptor.FieldDescriptor(
+      name='path', full_name='demoserver.AnalyzeResponse.path', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='us', full_name='demoserver.AnalyzeResponse.us', index=1,
+      number=2, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    descriptor.FieldDescriptor(
+      name='algorithm', full_name='demoserver.AnalyzeResponse.algorithm', index=2,
+      number=3, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=unicode("", "utf-8"),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  serialized_start=494,
+  serialized_end=577,
+)
+
+
 _STAT = descriptor.Descriptor(
   name='Stat',
   full_name='demoserver.Stat',
@@ -130,8 +361,8 @@ _STAT = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=169,
-  serialized_end=204,
+  serialized_start=579,
+  serialized_end=614,
 )
 
 
@@ -165,8 +396,8 @@ _RELATEDENTITY = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=206,
-  serialized_end=247,
+  serialized_start=616,
+  serialized_end=657,
 )
 
 
@@ -249,8 +480,8 @@ _DETAILEDENTITY = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=250,
-  serialized_end=463,
+  serialized_start=660,
+  serialized_end=873,
 )
 
 
@@ -291,8 +522,8 @@ _ENTITYSEARCHRESPONSE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=465,
-  serialized_end=567,
+  serialized_start=875,
+  serialized_end=977,
 )
 
 
@@ -333,8 +564,8 @@ _INFLUENCE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=569,
-  serialized_end=622,
+  serialized_start=979,
+  serialized_end=1032,
 )
 
 
@@ -375,10 +606,13 @@ _INFLUENCESEARCHRESPONSE = descriptor.Descriptor(
   options=None,
   is_extendable=False,
   extension_ranges=[],
-  serialized_start=625,
-  serialized_end=757,
+  serialized_start=1035,
+  serialized_end=1167,
 )
 
+_OUTDATA.fields_by_name['neighbor'].message_type = _VDATADETAIL
+_OUTDATA.fields_by_name['edge'].message_type = _EDGE
+_ANALYZERESPONSE.fields_by_name['us'].message_type = _OUTDATA
 _DETAILEDENTITY.fields_by_name['stat'].message_type = _STAT
 _DETAILEDENTITY.fields_by_name['related_entity'].message_type = _RELATEDENTITY
 _ENTITYSEARCHRESPONSE.fields_by_name['entity'].message_type = _DETAILEDENTITY
@@ -386,6 +620,11 @@ _INFLUENCESEARCHRESPONSE.fields_by_name['influence'].message_type = _INFLUENCE
 _INFLUENCESEARCHRESPONSE.fields_by_name['influenced_by'].message_type = _INFLUENCE
 DESCRIPTOR.message_types_by_name['EntitySearchRequest'] = _ENTITYSEARCHREQUEST
 DESCRIPTOR.message_types_by_name['EntityDetailRequest'] = _ENTITYDETAILREQUEST
+DESCRIPTOR.message_types_by_name['VDataDetail'] = _VDATADETAIL
+DESCRIPTOR.message_types_by_name['Edge'] = _EDGE
+DESCRIPTOR.message_types_by_name['Outdata'] = _OUTDATA
+DESCRIPTOR.message_types_by_name['AnalyzeRequest'] = _ANALYZEREQUEST
+DESCRIPTOR.message_types_by_name['AnalyzeResponse'] = _ANALYZERESPONSE
 DESCRIPTOR.message_types_by_name['Stat'] = _STAT
 DESCRIPTOR.message_types_by_name['RelatedEntity'] = _RELATEDENTITY
 DESCRIPTOR.message_types_by_name['DetailedEntity'] = _DETAILEDENTITY
@@ -404,6 +643,36 @@ class EntityDetailRequest(message.Message):
   DESCRIPTOR = _ENTITYDETAILREQUEST
   
   # @@protoc_insertion_point(class_scope:demoserver.EntityDetailRequest)
+
+class VDataDetail(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _VDATADETAIL
+  
+  # @@protoc_insertion_point(class_scope:demoserver.VDataDetail)
+
+class Edge(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _EDGE
+  
+  # @@protoc_insertion_point(class_scope:demoserver.Edge)
+
+class Outdata(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _OUTDATA
+  
+  # @@protoc_insertion_point(class_scope:demoserver.Outdata)
+
+class AnalyzeRequest(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _ANALYZEREQUEST
+  
+  # @@protoc_insertion_point(class_scope:demoserver.AnalyzeRequest)
+
+class AnalyzeResponse(message.Message):
+  __metaclass__ = reflection.GeneratedProtocolMessageType
+  DESCRIPTOR = _ANALYZERESPONSE
+  
+  # @@protoc_insertion_point(class_scope:demoserver.AnalyzeResponse)
 
 class Stat(message.Message):
   __metaclass__ = reflection.GeneratedProtocolMessageType

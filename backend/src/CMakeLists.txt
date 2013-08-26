@@ -5,6 +5,7 @@ find_package(Protobuf REQUIRED)
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS interface.proto)
 
 include_directories("${SAE_SOURCE_DIR}/src/saedb")
+include_directories("${SAE_SOURCE_DIR}/src/app/demo")
 include_directories("${PROTOBUF_INCLUDE_DIRS}")
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
 
@@ -19,12 +20,16 @@ file (GLOB server_SOURCES
     "weibo.hpp"
     "weibodata.hpp"
     "user_searcher.hpp"
+    "pubmed.hpp"
+    "pubmeddata.hpp"
+    "med_expert_searcher"
     "search.*"
+    "analyze.*"
     "main.cpp"
 )
 
 add_executable(server ${server_SOURCES} ${PROTO_SRCS} ${PROTO_HDRS})
-target_link_libraries(server RpcServer glog gflags ${PROTOBUF_LIBRARY} aminerdata pminerdata weibodata)
+target_link_libraries(server RpcServer glog gflags ${PROTOBUF_LIBRARY} aminerdata pminerdata weibodata pubmeddata HIS networks)
 
 file (GLOB aminerimporter_SOURCES "aminerimporter.cpp" "csvreader.*")
 add_executable(aminerimporter ${aminerimporter_SOURCES})
@@ -37,6 +42,10 @@ target_link_libraries(pminerimporter mgraph)
 file (GLOB weiboimporter_SOURCES "weiboimporter.cpp")
 add_executable(weiboimporter ${weiboimporter_SOURCES})
 target_link_libraries(weiboimporter mgraph)
+        
+file (GLOB pubmedimporter_SOURCES "pubmedimporter.cpp" "csvreader.*")
+add_executable(pubmedimporter ${pubmedimporter_SOURCES})
+target_link_libraries(pubmedimporter mgraph)
 
 add_definitions(-DOS_LINUX)
 file (GLOB aminerdata_SOURCES "aminerdata.cpp" "aminerdata.hpp")
@@ -50,3 +59,7 @@ target_link_libraries(pminerdata mgraph indexing ArnetAnalyzer saedb ${demoserve
 file (GLOB weibodata_SOURCES "weibodata.cpp" "weibodata.hpp")
 add_library(weibodata ${weibodata_SOURCES})
 target_link_libraries(weibodata mgraph indexing ArnetAnalyzer saedb ${demoserver_BINARY_DIR}/libICTCLAS50.a)
+
+file (GLOB pubmeddata_SOURCES "pubmeddata.cpp" "pubmeddata.hpp")
+add_library(pubmeddata ${pubmeddata_SOURCES})
+target_link_libraries(pubmeddata mgraph indexing ArnetAnalyzer saedb)

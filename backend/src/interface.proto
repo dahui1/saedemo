@@ -12,6 +12,39 @@ message EntityDetailRequest {
     repeated int32 id = 2;
 }
 
+message VDataDetail {
+    required int32 id = 1;
+    required string name = 2;
+    repeated int32 communities = 3;
+    required double score = 4;
+}
+
+message Edge {
+    required int32 f = 1;
+    required int32 l = 2;
+}
+
+message Outdata {
+    required int32 id = 1;
+    required double score = 2;
+    required string name = 3;
+    repeated int32 communities = 4;
+    repeated VDataDetail neighbor = 5;
+    repeated Edge edge = 6;
+    required double pagerank = 7;
+}
+
+message AnalyzeRequest {
+    required string path = 1;
+    required string algorithm = 2;
+}
+
+message AnalyzeResponse {
+    required string path = 1;
+    repeated Outdata us = 2;
+    required string algorithm = 3;
+}
+
 message Stat {
     required string type = 1;
     required int32 value = 2;
