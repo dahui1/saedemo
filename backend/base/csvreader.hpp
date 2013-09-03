@@ -1,15 +1,23 @@
-#include "csvreader.hpp"
+#pragma once
+#include <string>
+#include <iostream>
+#include <vector>
 
-CSVReader::CSVReader(std::istream& source) : source(source) {
-}
+/*
+ * A naive csv reader for the Excel dialect.
+ */
+struct CSVReader {
 
-std::istream& CSVReader::readrow(std::vector<std::string>& line) {
-    std::string field;
-    line.clear();
+    CSVReader(std::istream& source) : source(source) {
+    }
 
-    char c;
-    while (source.get(c)) {
-        switch (c) {
+    std::istream& readrow(std::vector<std::string>& line) {
+        std::string field;
+        line.clear();
+
+        char c;
+        while (source.get(c)) {
+            switch (c) {
             case '"':
                 new_line = false;
                 if (in_quoted_field && !in_quote) {
@@ -56,8 +64,15 @@ std::istream& CSVReader::readrow(std::vector<std::string>& line) {
                 new_line = false;
                 field.push_back(c);
                 break;
+            }
         }
+        line.push_back(field);
+        return source;
     }
-    line.push_back(field);
-    return source;
-}
+
+private:
+    std::istream& source;
+    bool in_quoted_field = false;
+    bool in_quote = false;
+    bool new_line = false;
+};

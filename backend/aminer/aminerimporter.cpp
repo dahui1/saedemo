@@ -33,7 +33,7 @@
 #include <fstream>
 #include <unordered_map>
 #include "csvreader.hpp"
-#include "io/mgraph.hpp"
+#include "storage/mgraph.hpp"
 #include "aminer.hpp"
 
 using namespace std;

@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "serialization/serialization_includes.hpp"
+#include "serialization/serialization.hpp"
 
 using std::vector;
 using std::string;
