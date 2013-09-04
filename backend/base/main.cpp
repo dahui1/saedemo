@@ -11,6 +11,9 @@ using namespace zrpc;
 
 int main(int argc, char** argv) {
     gflags::ParseCommandLineFlags(&argc, &argv, true);
+    FLAGS_logtostderr = true;
+    google::InitGoogleLogging(argv[0]);
+    google::InstallFailureSignalHandler();
 
     LOG(INFO) << "Demo Server Starting...";
     RpcServer* server = RpcServer::CreateServer(FLAGS_port, FLAGS_threads);
