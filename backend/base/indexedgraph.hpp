@@ -97,6 +97,8 @@ namespace {
                     LOG(INFO) << "[" << shard_id << "] progress: " << processed.load() << "/" << total << "\t" << (double)(processed.load()) / total;
                 }
             }
+            LOG(INFO) << "[" << shard_id << "] optimizing...";
+            index_shards[shard_id].optimize();
             LOG(INFO) << "[" << shard_id << "] finished!";
         };
         dispatch_thread_group(index_builder, shards);
