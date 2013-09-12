@@ -25,7 +25,7 @@ namespace {
         auto index_searcher = [&](int shard_id) {
             indexing::Searcher basic_searcher(shards[shard_id]);
             std::unique_ptr<TokenStream> stream(tokenStream(query));
-            auto result = basic_searcher.search(stream);
+            auto result = basic_searcher.search(stream.get());
             std::sort(result.begin(), result.end());
             results[shard_id] = std::move(result);
         };

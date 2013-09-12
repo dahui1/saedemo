@@ -51,8 +51,9 @@ protected:
         for (auto& kv : scores) {
             vi->MoveTo(kv.first);
             auto edges_count = vi->InEdgeCount() + vi->OutEdgeCount();
-            auto out = kv.second * 0.85 / edges_count;
-            new_scores[kv.first] += kv.second * 0.15;
+            // XXX temporary fix, keep the majority of the score to make the iteration stable.
+            auto out = kv.second * 0.15 / edges_count;
+            new_scores[kv.first] += kv.second * 0.85;
             for (auto ei = vi->InEdges(); ei->Alive(); ei->Next()) {
                 new_scores[ei->SourceId()] += out;
             }

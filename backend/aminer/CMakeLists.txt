@@ -1,5 +1,7 @@
-cmake_minimum_required (VERSION 2.8)
-project (aminerserver)
+cmake_minimum_required(VERSION 2.8)
+project(aminerserver)
+
+add_subdirectory(act)
 
 add_executable(aminerserver "aminer.hpp" "aminerdata.hpp" "aminerservice.cpp")
 target_link_libraries(aminerserver servicebase mgraph indexing)
